@@ -19,7 +19,7 @@
  * Version:           1.0.0
  * Author:            Error Studio
  * Author URI:        http://errorstudio.co.uk
- * License:           GPL-2.0+
+ * License:           MIT
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
  * Text Domain:       justified-api-authentication
  * Domain Path:       /languages
