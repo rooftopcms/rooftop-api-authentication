@@ -9,8 +9,8 @@
  * @link       http://errorstudio.co.uk
  * @since      1.0.0
  *
- * @package    Justified_Wordpress_Api_Authentication
- * @subpackage Justified_Wordpress_Api_Authentication/includes
+ * @package    Justified_Api_Authentication
+ * @subpackage Justified_Api_Authentication/includes
  */
 
 /**
@@ -20,11 +20,11 @@
  * so that it is ready for translation.
  *
  * @since      1.0.0
- * @package    Justified_Wordpress_Api_Authentication
- * @subpackage Justified_Wordpress_Api_Authentication/includes
+ * @package    Justified_Api_Authentication
+ * @subpackage Justified_Api_Authentication/includes
  * @author     Error Studio <info@errorstudio.co.uk>
  */
-class Justified_Wordpress_Api_Authentication_i18n {
+class Justified_Api_Authentication_i18n {
 
 	/**
 	 * The domain specified for this plugin.

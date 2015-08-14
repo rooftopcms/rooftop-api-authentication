@@ -6,8 +6,8 @@
  * @link       http://errorstudio.co.uk
  * @since      1.0.0
  *
- * @package    Justified_Wordpress_Api_Authentication
- * @subpackage Justified_Wordpress_Api_Authentication/includes
+ * @package    Justified_Api_Authentication
+ * @subpackage Justified_Api_Authentication/includes
  */
 
 /**
@@ -16,11 +16,11 @@
  * This class defines all code necessary to run during the plugin's activation.
  *
  * @since      1.0.0
- * @package    Justified_Wordpress_Api_Authentication
- * @subpackage Justified_Wordpress_Api_Authentication/includes
+ * @package    Justified_Api_Authentication
+ * @subpackage Justified_Api_Authentication/includes
  * @author     Error Studio <info@errorstudio.co.uk>
  */
-class Justified_Wordpress_Api_Authentication_Activator {
+class Justified_Api_Authentication_Activator {
 
 	/**
 	 * Short Description. (use period)

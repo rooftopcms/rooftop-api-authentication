@@ -6,8 +6,8 @@
  * @link       http://errorstudio.co.uk
  * @since      1.0.0
  *
- * @package    Justified_Wordpress_Api_Authentication
- * @subpackage Justified_Wordpress_Api_Authentication/includes
+ * @package    Justified_Api_Authentication
+ * @subpackage Justified_Api_Authentication/includes
  */
 
 /**
@@ -17,11 +17,11 @@
  * the plugin, and register them with the WordPress API. Call the
  * run function to execute the list of actions and filters.
  *
- * @package    Justified_Wordpress_Api_Authentication
- * @subpackage Justified_Wordpress_Api_Authentication/includes
+ * @package    Justified_Api_Authentication
+ * @subpackage Justified_Api_Authentication/includes
  * @author     Error Studio <info@errorstudio.co.uk>
  */
-class Justified_Wordpress_Api_Authentication_Loader {
+class Justified_Api_Authentication_Loader {
 
 	/**
 	 * The array of actions registered with WordPress.

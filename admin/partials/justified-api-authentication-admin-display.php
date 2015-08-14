@@ -8,8 +8,8 @@
  * @link       http://errorstudio.co.uk
  * @since      1.0.0
  *
- * @package    Justified_Wordpress_Api_Authentication
- * @subpackage Justified_Wordpress_Api_Authentication/admin/partials
+ * @package    Justified_Api_Authentication
+ * @subpackage Justified_Api_Authentication/admin/partials
  */
 ?>
 
