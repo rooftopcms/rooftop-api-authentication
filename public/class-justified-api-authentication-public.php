@@ -100,4 +100,36 @@ class Justified_Api_Authentication_Public {
 
 	}
 
+
+    /**
+     * Checks the request for the API key and ensures it's valid for the given endpoint
+     */
+    public function validate_api_key(){
+        $request_domain = $_SERVER['HTTP_HOST'];
+        $api_key = array_key_exists('HTTP_API_KEY', $_SERVER) ? $_SERVER['HTTP_API_KEY'] : null;
+        $permitted = false;
+
+        if($api_key) {
+            global $wpdb;
+
+            $table_name = $wpdb->prefix . "api_keys";
+            $sql = "SELECT domain, api_key FROM $table_name WHERE domain = '$request_domain' AND api_key = '$api_key'";
+            $result = $wpdb->get_row($sql, OBJECT);
+
+            if($result) {
+                $permitted = true;
+            }else {
+                $permitted = new WP_Error('unauthorized', 'Authentication failed', array('status'=>403));
+            }
+        }else {
+            $permitted = new WP_Error('forbidden', 'Authentication failed', array('status'=>401));
+        }
+
+        return $permitted;
+    }
+
+    public function adjust_query_for_preview_mode(){
+        $f = func_get_args();
+        $a = 1;
+    }
 }

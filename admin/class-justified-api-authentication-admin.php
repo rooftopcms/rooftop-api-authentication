@@ -100,4 +100,32 @@ class Justified_Api_Authentication_Admin {
 
 	}
 
+
+    /**
+     * Using the edit_user_profile hook, add the API Keys form to the user edit form if they have the manage_options capability
+     */
+    public function add_fields_to_user_admin($user) {
+        if(!current_user_can('manage_options')){
+            wp_die(__("You don't have permissions to manage this page"));
+        }
+
+        $has_api_key = get_user_option("has_api_key", $user->ID);
+        if($has_api_key) {
+            $keys = Justified_Api_Authentication_Keys::get_api_key($user->ID);
+        }
+        require_once plugin_dir_path( __FILE__ ) . 'partials/justified-api-authentication-user-form.php';
+    }
+
+    public function handle_user_admin_update($user_id) {
+        $is_api_user = array_key_exists("api_user", $_POST) && $_POST["api_user"]=="on";
+        $has_api_key = get_user_option("has_api_key", $user_id);
+
+        if($is_api_user && $is_api_user!=$has_api_key) {
+            // create api keys if is_api_user is true, and we're updating this user option (new value != old value)
+            Justified_Api_Authentication_Keys::generate_api_keys($user_id);
+        }elseif(!$is_api_user && $has_api_key){
+            // delete api keys
+            Justified_Api_Authentication_Keys::delete_api_keys($user_id);
+        }
+    }
 }

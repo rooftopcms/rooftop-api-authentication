@@ -119,6 +119,8 @@ class Justified_Api_Authentication {
 		 */
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-justified-api-authentication-public.php';
 
+        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-justified-api-authentication-keys.php';
+
 		$this->loader = new Justified_Api_Authentication_Loader();
 
 	}
@@ -155,6 +157,8 @@ class Justified_Api_Authentication {
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
 
+        $this->loader->add_action('edit_user_profile', $plugin_admin, 'add_fields_to_user_admin', 10, 1);
+        $this->loader->add_action('edit_user_profile_update', $plugin_admin, 'handle_user_admin_update', 10, 1);
 	}
 
 	/**
@@ -171,6 +175,8 @@ class Justified_Api_Authentication {
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
 
+        $this->loader->add_filter('rest_authentication_errors', $plugin_public, 'validate_api_key');
+        $this->loader->add_filter('rest_post_query', $plugin_public, 'adjust_query_for_preview_mode');
 	}
 
 	/**
