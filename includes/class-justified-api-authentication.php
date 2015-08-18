@@ -175,6 +175,7 @@ class Justified_Api_Authentication {
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
 
+        $this->loader->add_filter('determine_current_user', $plugin_public, 'set_current_user', 20);
         $this->loader->add_filter('rest_authentication_errors', $plugin_public, 'validate_api_key');
         $this->loader->add_filter('rest_post_query', $plugin_public, 'adjust_query_for_preview_mode');
 	}

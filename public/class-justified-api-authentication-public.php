@@ -101,35 +101,59 @@ class Justified_Api_Authentication_Public {
 	}
 
 
-    /**
-     * Checks the request for the API key and ensures it's valid for the given endpoint
-     */
-    public function validate_api_key(){
+    public function set_current_user($user) {
+        global $wp_rest_auth_error;
+        $wp_rest_auth_error = null;
+
+        if (!empty($user)) {
+            return $user;
+        }
+
+        remove_filter( 'determine_current_user', 'json_basic_auth_handler', 20 );
         $request_domain = $_SERVER['HTTP_HOST'];
         $api_key = array_key_exists('HTTP_API_KEY', $_SERVER) ? $_SERVER['HTTP_API_KEY'] : null;
-        $permitted = false;
 
         if($api_key) {
             global $wpdb;
 
             $table_name = $wpdb->prefix . "api_keys";
-            $sql = "SELECT domain, api_key FROM $table_name WHERE domain = '$request_domain' AND api_key = '$api_key'";
+            $sql = "SELECT domain, api_key, user_id FROM $table_name WHERE domain = '$request_domain' AND api_key = '$api_key'";
             $result = $wpdb->get_row($sql, OBJECT);
 
             if($result) {
-                $permitted = true;
+                $wp_rest_auth_error = $result->user_id;
             }else {
-                $permitted = new WP_Error('unauthorized', 'Authentication failed', array('status'=>403));
+                $wp_rest_auth_error = new WP_Error('unauthorized', 'Authentication failed', array('status'=>403));
             }
         }else {
-            $permitted = new WP_Error('forbidden', 'Authentication failed', array('status'=>401));
+            $wp_rest_auth_error = new WP_Error('forbidden', 'Authentication failed', array('status'=>401));
         }
 
-        return $permitted;
+        add_filter('determine_current_user', 'json_basic_auth_handler', 20);
+
+        if (is_wp_error($wp_rest_auth_error)) {
+            return null;
+        }
+        return $wp_rest_auth_error;
     }
 
-    public function adjust_query_for_preview_mode(){
-        $f = func_get_args();
-        $a = 1;
+    /**
+     * Checks the request for the API key and ensures it's valid for the given endpoint
+     */
+    public function validate_api_key($error){
+        if(!empty($error)){
+            return $error;
+        }
+
+        global $wp_rest_auth_error;
+        return $wp_rest_auth_error;
+    }
+
+    public function adjust_query_for_preview_mode($query_args){
+        if(true == JUSTIFIED_PREVIEW_MODE) {
+            $query_args['post_status'] = array('publish', 'draft', 'scheduled', 'pending');
+        }
+
+        return $query_args;
     }
 }
