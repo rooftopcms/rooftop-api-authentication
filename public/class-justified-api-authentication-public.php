@@ -150,7 +150,11 @@ class Justified_Api_Authentication_Public {
     }
 
     /**
-     * Checks the request for the API key and ensures it's valid for the given endpoint
+     * @param $error
+     * @return mixed
+     *
+     * Checks the request for the API key and ensures it's valid for the given endpoint.
+     * Called after set_current_user.
      */
     public function validate_api_key($error){
         if(!empty($error)){
@@ -161,8 +165,14 @@ class Justified_Api_Authentication_Public {
         return $wp_rest_auth_error;
     }
 
+    /**
+     * @param $query_args
+     * @return mixed
+     *
+     * if we're in preview mode, return any post which is visible, or intended to be visible (ie not deleted)
+     */
     public function adjust_query_for_preview_mode($query_args){
-        if(true == JUSTIFIED_PREVIEW_MODE) {
+        if(deinfed("JUSTIFIED_PREVIEW_MODE") && true == JUSTIFIED_PREVIEW_MODE) {
             $query_args['post_status'] = array('publish', 'draft', 'scheduled', 'pending');
         }
 
