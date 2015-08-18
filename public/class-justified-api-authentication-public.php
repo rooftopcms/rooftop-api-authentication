@@ -172,7 +172,7 @@ class Justified_Api_Authentication_Public {
      * if we're in preview mode, return any post which is visible, or intended to be visible (ie not deleted)
      */
     public function adjust_query_for_preview_mode($query_args){
-        if(deinfed("JUSTIFIED_PREVIEW_MODE") && true == JUSTIFIED_PREVIEW_MODE) {
+        if(defined("JUSTIFIED_PREVIEW_MODE") && true == JUSTIFIED_PREVIEW_MODE) {
             $query_args['post_status'] = array('publish', 'draft', 'scheduled', 'pending');
         }
 
