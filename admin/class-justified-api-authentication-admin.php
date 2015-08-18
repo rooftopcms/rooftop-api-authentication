@@ -109,11 +109,16 @@ class Justified_Api_Authentication_Admin {
             wp_die(__("You don't have permissions to manage this page"));
         }
 
-        $has_api_key = get_user_option("has_api_key", $user->ID);
-        if($has_api_key) {
-            $keys = Justified_Api_Authentication_Keys::get_api_key($user->ID);
+        $userdata = get_userdata($_GET['user_id']);
+        $required_roles = array('administrator', 'contributer');
+
+        if($userdata && count(count(array_intersect($userdata->roles, $required_roles)))) {
+            $has_api_key = get_user_option("has_api_key", $user->ID);
+            if($has_api_key) {
+                $keys = Justified_Api_Authentication_Keys::get_api_key($user->ID);
+            }
+            require_once plugin_dir_path( __FILE__ ) . 'partials/justified-api-authentication-user-form.php';
         }
-        require_once plugin_dir_path( __FILE__ ) . 'partials/justified-api-authentication-user-form.php';
     }
 
     public function handle_user_admin_update($user_id) {

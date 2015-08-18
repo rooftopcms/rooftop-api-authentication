@@ -35,7 +35,7 @@ class Justified_Api_Authentication_Keys {
         $blog = self::get_blog($user_id);
         $domain = $blog->domain;
 
-        $current_key_count_sql = "SELECT COUNT(*) FROM wp_2_api_keys WHERE domain = '$domain';";
+        $current_key_count_sql = "SELECT COUNT(*) FROM wp_2_api_keys WHERE domain = '$domain' AND user_id = $user_id;";
         $current_key_count = (int)$wpdb->get_var($current_key_count_sql);
         if($current_key_count != 0){
             wp_die(__("API key not generated - this user already has an API key"));

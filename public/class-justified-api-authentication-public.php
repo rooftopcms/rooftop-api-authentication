@@ -101,31 +101,43 @@ class Justified_Api_Authentication_Public {
 	}
 
 
+    /**
+     *
+     * Return the user ID of the user associated with the given API key, or raise a WP_Error
+     * which is later returned by the validate_api_key hook
+     */
     public function set_current_user($user) {
         global $wp_rest_auth_error;
         $wp_rest_auth_error = null;
 
+        // return if we already have a user
         if (!empty($user)) {
             return $user;
         }
 
         remove_filter( 'determine_current_user', 'json_basic_auth_handler', 20 );
+
+        // check that we've been given an api key header
         $request_domain = $_SERVER['HTTP_HOST'];
         $api_key = array_key_exists('HTTP_API_KEY', $_SERVER) ? $_SERVER['HTTP_API_KEY'] : null;
 
         if($api_key) {
+            // look up the API key against in the api keys table, along with the request domain
             global $wpdb;
 
             $table_name = $wpdb->prefix . "api_keys";
             $sql = "SELECT domain, api_key, user_id FROM $table_name WHERE domain = '$request_domain' AND api_key = '$api_key'";
             $result = $wpdb->get_row($sql, OBJECT);
 
+            // set_current_user should return either a valid user ID, or a WP_Error
             if($result) {
                 $wp_rest_auth_error = $result->user_id;
             }else {
+                // we were given a key, but it's wrong, or invalid for this domain
                 $wp_rest_auth_error = new WP_Error('unauthorized', 'Authentication failed', array('status'=>403));
             }
         }else {
+            // no key given
             $wp_rest_auth_error = new WP_Error('forbidden', 'Authentication failed', array('status'=>401));
         }
 
