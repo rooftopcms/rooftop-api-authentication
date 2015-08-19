@@ -52,6 +52,16 @@ class Justified_Api_Authentication_Public {
 		$this->plugin_name = $plugin_name;
 		$this->version = $version;
 
+//        $debug_tags = array();
+//        add_action( 'all', function ( $tag ) {
+//            global $debug_tags;
+//            if ( in_array( $tag, $debug_tags ) ) {
+//                return;
+//            }
+//            echo "<pre>" . $tag . "</pre>";
+//            $debug_tags[] = $tag;
+//        } );
+//        print_r($debug_tags);
 	}
 
 	/**
@@ -128,6 +138,8 @@ class Justified_Api_Authentication_Public {
             $table_name = $wpdb->prefix . "api_keys";
             $sql = "SELECT domain, api_key, user_id FROM $table_name WHERE domain = '$request_domain' AND api_key = '$api_key'";
             $result = $wpdb->get_row($sql, OBJECT);
+
+
 
             // set_current_user should return either a valid user ID, or a WP_Error
             if($result) {

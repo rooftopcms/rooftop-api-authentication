@@ -133,4 +133,26 @@ class Justified_Api_Authentication_Admin {
             Justified_Api_Authentication_Keys::delete_api_keys($user_id);
         }
     }
+
+    public function api_menu_links() {
+        // add a top-level admin page
+//        add_menu_page("API Admin", "API Admin", "manage-options", $this->plugin_name."-api-admin", array($this, "api_admin_page"));
+        add_options_page("API Overview", "API Overview", "manage-options", $this->plugin_name."-api-overview-page", array($this, "justified_api_overview_page"));
+    }
+    function justified_api_overview_page() {
+        global $wpdb;
+
+        $request_domain = $_SERVER['HTTP_HOST'];
+        $table_name = $wpdb->prefix . "api_keys";
+        $sql = "SELECT domain, api_key, user_id FROM $table_name WHERE domain = '$request_domain';";
+
+        $api_users = array();
+        $results = $wpdb->get_results($sql, OBJECT);
+        foreach($results as $result) {
+            $user = get_userdata($result->user_id);
+            $api_users[] = array('id' => $user->ID, 'email' => $user->user_email, 'api_key' => $result->api_key);
+        }
+
+        require_once plugin_dir_path( __FILE__ ) . 'partials/justified-api-authentication-admin-api-details.php';
+    }
 }
