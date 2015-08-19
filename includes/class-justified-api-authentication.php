@@ -119,6 +119,12 @@ class Justified_Api_Authentication {
 		 */
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-justified-api-authentication-public.php';
 
+
+        /**
+         * The class that provides the methods for creating or removing API keys
+         */
+        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-justified-api-authentication-keys.php';
+
 		$this->loader = new Justified_Api_Authentication_Loader();
 
 	}
@@ -159,6 +165,8 @@ class Justified_Api_Authentication {
         $this->loader->add_action('edit_user_profile_update', $plugin_admin, 'handle_user_admin_update', 10, 1);
 
         // admin pages
+        $this->loader->add_filter('option_wp_'.get_current_blog_id().'_user_roles', $plugin_admin, 'filter_api_user_roles');
+        $this->loader->add_filter('admin_init', $plugin_admin, 'add_api_user_roles');
         $this->loader->add_action('admin_menu', $plugin_admin, 'api_menu_links');
 	}
 
