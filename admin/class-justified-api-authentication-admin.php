@@ -189,13 +189,13 @@ class Justified_Api_Authentication_Admin {
      * Called via admin_init
      */
     public function add_api_user_roles($blog_id) {
-        $roles_set = get_blog_option($blog_id, "api_roles_added");
+        $roles_set = get_option("api_roles_added");
 
         if(!$roles_set){
             add_role("api-read-only", "Read Only API User", array('manage_options'));
             add_role("api-read-write", "Read/Write API User", array('manage_options'));
 
-            update_blog_option($blog_id, "api_roles_added", true);
+            update_option("api_roles_added", true);
         }
     }
 
