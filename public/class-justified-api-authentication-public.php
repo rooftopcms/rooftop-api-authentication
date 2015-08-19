@@ -143,8 +143,6 @@ class Justified_Api_Authentication_Public {
             $sql = "SELECT domain, api_key, user_id FROM $table_name WHERE domain = '$request_domain' AND api_key = '$api_key'";
             $result = $wpdb->get_row($sql, OBJECT);
 
-
-
             // set_current_user should return either a valid user ID, or a WP_Error
             if($result) {
                 $wp_rest_auth_error = $result->user_id;

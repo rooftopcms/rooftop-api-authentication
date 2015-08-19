@@ -52,6 +52,17 @@ class Justified_Api_Authentication_Admin {
 		$this->plugin_name = $plugin_name;
 		$this->version = $version;
 
+
+//        $debug_tags = array();
+//        add_action( 'all', function ( $tag ) {
+//            global $debug_tags;
+//            if ( in_array( $tag, $debug_tags ) ) {
+//                return;
+//            }
+//            echo "<pre>" . $tag . "</pre>";
+//            $debug_tags[] = $tag;
+//        } );
+//        print_r($debug_tags);
 	}
 
 	/**
@@ -135,24 +146,58 @@ class Justified_Api_Authentication_Admin {
     }
 
     public function api_menu_links() {
-        // add a top-level admin page
-//        add_menu_page("API Admin", "API Admin", "manage-options", $this->plugin_name."-api-admin", array($this, "api_admin_page"));
-        add_options_page("API Overview", "API Overview", "manage-options", $this->plugin_name."-api-overview-page", array($this, "justified_api_overview_page"));
+        add_options_page("API Overview", "API Overview", "manage-options", $this->plugin_name."-api-overview-page", function(){
+            global $wpdb;
+
+            $request_domain = $_SERVER['HTTP_HOST'];
+            $table_name = $wpdb->prefix . "api_keys";
+            $sql = "SELECT domain, api_key, user_id FROM $table_name WHERE domain = '$request_domain';";
+
+            $api_users = array();
+            $results = $wpdb->get_results($sql, OBJECT);
+            foreach($results as $result) {
+                $user = get_userdata($result->user_id);
+                $api_users[] = array('id' => $user->ID, 'email' => $user->user_email, 'api_key' => $result->api_key);
+            }
+            require_once plugin_dir_path( __FILE__ ) . 'partials/justified-api-authentication-admin-api-details.php';
+        });
+
+        add_submenu_page(null, "Add API User", "Add API User", "manage-options", $this->plugin_name."-api-add-user", function(){
+            if($_POST){
+                if(!isset($_POST['api-field-token']) || !wp_verify_nonce($_POST['api-field-token'], 'justified-api-authentication-api-add-user')) {
+                    print 'Form token not verified';
+                    exit;
+                }
+
+
+            }else {
+                require_once plugin_dir_path( __FILE__ ) . 'partials/justified-api-authentication-admin-api-add-user.php';
+            }
+        });
     }
-    function justified_api_overview_page() {
-        global $wpdb;
 
-        $request_domain = $_SERVER['HTTP_HOST'];
-        $table_name = $wpdb->prefix . "api_keys";
-        $sql = "SELECT domain, api_key, user_id FROM $table_name WHERE domain = '$request_domain';";
+    /**
+     * @param $roles
+     * @return mixed
+     *
+     * When rendering the user-edit form, remove the API specific user roles from the roles that are available in the dropdown.
+     * 
+     * Called via ('option_wp_'.get_current_blog_id().'_user_roles')
+     */
+    public function filter_api_user_roles($roles) {
+        unset($roles['read-only']);
+        unset($roles['read-write']);
+        return $roles;
+    }
 
-        $api_users = array();
-        $results = $wpdb->get_results($sql, OBJECT);
-        foreach($results as $result) {
-            $user = get_userdata($result->user_id);
-            $api_users[] = array('id' => $user->ID, 'email' => $user->user_email, 'api_key' => $result->api_key);
-        }
-
-        require_once plugin_dir_path( __FILE__ ) . 'partials/justified-api-authentication-admin-api-details.php';
+    /**
+     * Add the roles required for a valid 'api user' account - these roles shouldn't be visible in the admin area, and
+     * are removed by a filter ('option_wp_'.get_current_blog_id().'_user_roles')
+     *
+     * Called via admin_init
+     */
+    public function add_api_user_roles() {
+        add_role("read-only", "Read Only API User", array());
+        add_role("read-write", "Read/Write API User", array());
     }
 }
