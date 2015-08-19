@@ -120,7 +120,11 @@ class Justified_Api_Authentication_Public {
         global $wp_rest_auth_error;
         $wp_rest_auth_error = null;
 
-        // return if we already have a user
+        /**
+         * return if we already have a user via a wordpress session.
+         * if we dont want logged in users to have access without an API key, then we should check
+         * whether we're hitting a rest enpoint or a regular WP-Admin page
+         */
         if (!empty($user)) {
             return $user;
         }
