@@ -33,7 +33,8 @@ class Justified_Api_Authentication_Activator {
 	 * @since    1.0.0
 	 */
 	public static function activate() {
-        self::update_database_schema();
+        // this method isn't  called when used as an mu-plugin
+//        self::update_database_schema();
 	}
 
 
@@ -43,14 +44,15 @@ class Justified_Api_Authentication_Activator {
      * domain - the client site domain name
      * api_key - the api key to authenticate the client request
      */
-    public static function update_database_schema() {
+    public static function create_database_schema($blog_id) {
         global $wpdb;
 
-        $table_name = $wpdb->prefix . "api_keys";
+        $table_name = $wpdb->prefix . "${blog_id}_api_keys";
 
-        if($wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name){
+        if($wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name) {
             $sql = <<<EOSQL
 CREATE TABLE $table_name (
+    key_name VARCHAR(256) NOT NULL,
     domain VARCHAR(256) NOT NULL,
     api_key VARCHAR(256) NOT NULL,
     user_id INTEGER NOT NULL,

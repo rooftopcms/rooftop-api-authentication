@@ -155,19 +155,19 @@ class Justified_Api_Authentication {
 	 * @access   private
 	 */
 	private function define_admin_hooks() {
-
 		$plugin_admin = new Justified_Api_Authentication_Admin( $this->get_plugin_name(), $this->get_version() );
 
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
 
-        $this->loader->add_action('edit_user_profile', $plugin_admin, 'add_fields_to_user_admin', 10, 1);
-        $this->loader->add_action('edit_user_profile_update', $plugin_admin, 'handle_user_admin_update', 10, 1);
-
         // admin pages
         $this->loader->add_filter('option_wp_'.get_current_blog_id().'_user_roles', $plugin_admin, 'filter_api_user_roles');
-        $this->loader->add_filter('admin_init', $plugin_admin, 'add_api_user_roles');
         $this->loader->add_action('admin_menu', $plugin_admin, 'api_menu_links');
+
+        $this->loader->add_action('wpmu_new_blog', $plugin_admin, 'add_api_key_tables', 10);
+        $this->loader->add_filter('wpmu_new_blog', $plugin_admin, 'add_api_user_roles', 11);
+        $this->loader->add_action('wpmu_new_blog', $plugin_admin, 'add_api_roles_and_users', 12);
+        $this->loader->add_action('delete_blog', $plugin_admin, 'remove_blog_tables');
 	}
 
 	/**

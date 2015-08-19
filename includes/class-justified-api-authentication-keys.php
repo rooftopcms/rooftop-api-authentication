@@ -28,14 +28,14 @@
  * @author     Error Studio <info@errorstudio.co.uk>
  */
 class Justified_Api_Authentication_Keys {
-    public static function generate_api_keys($user_id){
+    public static function generate_api_key($key_name, $user_id){
         global $wpdb;
 
         update_user_option($user_id, "has_api_key", true);
         $blog = self::get_blog($user_id);
         $domain = $blog->domain;
 
-        $current_key_count_sql = "SELECT COUNT(*) FROM wp_2_api_keys WHERE domain = '$domain' AND user_id = $user_id;";
+        $current_key_count_sql = "SELECT COUNT(*) FROM wp_2_api_keys WHERE domain = '$domain' AND user_id = $user_id AND key_name = '$key_name';";
         $current_key_count = (int)$wpdb->get_var($current_key_count_sql);
         if($current_key_count != 0){
             wp_die(__("API key not generated - this user already has an API key"));
@@ -43,8 +43,10 @@ class Justified_Api_Authentication_Keys {
 
         $key = self::api_key();
         $table_name = $wpdb->prefix . "api_keys";
-        $new_key = array('domain'=>$domain, 'api_key'=>$key, 'user_id'=>$user_id);
-        $wpdb->insert($table_name, $new_key, array('%s', '%s', '%d'));
+        $new_key = array('key_name' => $key_name, 'domain'=>$domain, 'api_key'=>$key, 'user_id'=>$user_id);
+        $inserted = $wpdb->insert($table_name, $new_key, array('%s', '%s', '%d'));
+
+        return $inserted;
     }
     public static function delete_api_keys($user_id){
         global $wpdb;
