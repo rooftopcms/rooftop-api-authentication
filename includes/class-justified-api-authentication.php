@@ -164,10 +164,10 @@ class Justified_Api_Authentication {
         $this->loader->add_filter('option_wp_'.get_current_blog_id().'_user_roles', $plugin_admin, 'filter_api_user_roles');
         $this->loader->add_action('admin_menu', $plugin_admin, 'api_menu_links');
 
-        $this->loader->add_filter('admin_init', $plugin_admin, 'add_api_user_roles', 11);
-        $this->loader->add_action('wpmu_new_blog', $plugin_admin, 'add_api_key_tables', 10);
-//        $this->loader->add_action('wpmu_new_blog', $plugin_admin, 'add_api_roles_and_users', 12);
+        $this->loader->add_filter('admin_init', $plugin_admin, 'add_api_user_roles');
+        $this->loader->add_action('wpmu_new_blog', $plugin_admin, 'add_api_key_tables');
         $this->loader->add_action('delete_blog', $plugin_admin, 'remove_api_key_tables');
+        $this->loader->add_action('delete_user', $plugin_admin, 'remove_user_from_network');
 	}
 
 	/**

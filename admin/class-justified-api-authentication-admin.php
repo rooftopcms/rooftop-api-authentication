@@ -233,9 +233,9 @@ class Justified_Api_Authentication_Admin {
 //        print_r($wp_roles->roles['editor']['capabilities']);
 //        echo "</pre>";
 //        exit;
-        delete_option("api_roles_added");
-        remove_role("api-read-only");
-        remove_role("api-read-write");
+//        delete_option("api_roles_added");
+//        remove_role("api-read-only");
+//        remove_role("api-read-write");
 
         if(!$roles_set){
             add_role("api-read-only", "Read Only API User", array(
@@ -278,14 +278,44 @@ class Justified_Api_Authentication_Admin {
         }
     }
 
+    /**
+     * @param $blog_id
+     * @return mixed
+     * 
+     * Add the blog specific api_keys tables
+     */
     public function add_api_key_tables($blog_id){
         Justified_Api_Authentication_Activator::create_database_tables($blog_id);
         return $blog_id;
     }
 
+    /**
+     * @param $blog_id
+     * @return mixed
+     *
+     * remove the blog specific api_keys tables
+     */
     public function remove_api_key_tables($blog_id){
         Justified_Api_Authentication_Activator::drop_database_tables($blog_id);
         return $blog_id;
     }
 
+    /**
+     * @param $user_id
+     *
+     * When we remove an API key, we also remove the corresponding user account from the site.
+     * However, the user isn't also deleted from the parent network (only its association to the sub-site)
+     *
+     * The delete_user hook calls this, with the $user_id and we remove the user manually (but only if it
+     * only belongs to 1 blog)
+     */
+    public function remove_user_from_network($user_id){
+        global $wpdb;
+
+        $blogs = get_blogs_of_user($user_id);
+        if(count($blogs)==1){
+            $table_name = $wpdb->base_prefix."users";
+            $wpdb->delete($table_name, array('id' => $user_id));
+        }
+    }
 }
