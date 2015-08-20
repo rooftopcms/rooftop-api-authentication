@@ -120,49 +120,78 @@ class Justified_Api_Authentication_Admin {
 
             $request_domain = $_SERVER['HTTP_HOST'];
             $table_name = $wpdb->prefix . "api_keys";
-            $sql = "SELECT domain, api_key, user_id FROM $table_name WHERE domain = '$request_domain';";
+            $sql = "SELECT id, key_name, domain, api_key, user_id FROM $table_name WHERE domain = '$request_domain';";
 
-            $api_users = array();
+            $api_keys = array();
             $results = $wpdb->get_results($sql, OBJECT);
             foreach($results as $result) {
-                $user = get_userdata($result->user_id);
-                $api_users[] = array('id' => $user->ID, 'email' => $user->user_email, 'api_key' => $result->api_key);
+                $api_keys[] = array('id' => $result->id, 'key_name' => $result->key_name, 'api_key' => $result->api_key);
             }
             require_once plugin_dir_path( __FILE__ ) . 'partials/justified-api-authentication-admin-api-details.php';
         });
 
-        add_submenu_page(null, "Add API User", "Add API User", "manage_options", $this->plugin_name."-api-add-user", function(){
+        add_submenu_page(null, "View API Key", "View API Key", "manage_options", $this->plugin_name."-api-view-key", function(){
+            global $wpdb;
+            $table_name = $table_name = $wpdb->prefix . "api_keys";
+            $blog = get_blog_details(get_current_blog_id());
+            $api_key = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table_name WHERE domain = %s and id = %d", array($blog->domain, $_GET['id'])));
+
             if($_POST){
-                if(!isset($_POST['api-field-token']) || !wp_verify_nonce($_POST['api-field-token'], 'justified-api-authentication-api-add-user')) {
-                    print 'Form token not verified';
+                if(!isset($_POST['api-field-token']) || !wp_verify_nonce($_POST['api-field-token'], 'justified-api-authentication-api-view-key')) {
+                    print '<div class="wrap"><div class="errors"><p>Form token not verified</p></div></div>';
                     exit;
                 }
 
-                if(!$_POST['key_name']){
-                    echo "Key name required";
-                    require_once plugin_dir_path( __FILE__ ) . 'partials/justified-api-authentication-admin-api-add-user.php';
+                if($api_key) {
+                    $wpdb->delete($table_name, array('id' => $_GET['id']));
+                    print '<div class="wrap"><div class="errors"><p>Key Deleted</p> <p><a href="/wp-admin/options-general.php?page=justified-api-authentication-api-overview-page">API Overview</a></p> </div></div>';
+                    exit;
+                }else {
+                    print '<div class="wrap"><div class="errors"><p>Key not found</p></div></div>';
+                    exit;
+                }
+            }else {
+                require_once plugin_dir_path( __FILE__ ) . 'partials/justified-api-authentication-admin-api-view-key.php';
+            }
+        });
+
+        add_submenu_page(null, "Add API Key", "Add API Key", "manage_options", $this->plugin_name."-api-add-key", function(){
+            if($_POST){
+                if(!isset($_POST['api-field-token']) || !wp_verify_nonce($_POST['api-field-token'], 'justified-api-authentication-api-add-key')) {
+                    print '<div class="wrap"><div class="errors"><p>Form token not verified</p></div></div>';
+                    exit;
+                }
+
+                $blog = get_blog_details(get_current_blog_id());
+                if(!$_POST['key_name'] || Justified_Api_Authentication_Keys::key_name_exists($_POST['key_name'], $blog)){
+                    echo '<div class="wrap"><div class="errors"><p>Unique key name required</p></div></div>';
+                    require_once plugin_dir_path( __FILE__ ) . 'partials/justified-api-authentication-admin-api-add-key.php';
                     return;
                 }
 
-                $role = (isset($_POST['key_read_only']) && $_POST['key_read_only']=="on") ? 'api-read-only' : 'api-read-write';
+                $role = (isset($_POST['key_read_only']) && $_POST['key_read_only']=="on") ? get_role('api-read-only') : get_role('api-read-write');
 
+                $blog_id = get_current_blog_id();
                 $api_key_name = $_POST['key_name'];
-                $api_username = "$api_key_name API User $role";
+                $api_username = "API USER $blog_id $api_key_name";
                 $api_password = md5(uniqid(rand(), true));
 
                 $api_user_id = wp_create_user($api_username, $api_password);
                 $api_user = get_userdata($api_user_id);
-                $api_user->set_role($role);
+                $api_user->add_role($role->name);
+                add_user_to_blog($blog_id, $api_user_id, $role->name);
 
                 if($api_user_id && Justified_Api_Authentication_Keys::generate_api_key($api_key_name, $api_user_id)) {
-                    echo "Added API Key";
+                    echo '<div class="wrap"><p>New key added</p></div>';
+                    require_once plugin_dir_path( __FILE__ ) . 'partials/justified-api-authentication-admin-api-add-key.php';
                     return;
                 }else {
                     echo "Couldn't generate API key - please contact support";
                     return;
                 }
+//            }elseif(){
             }else {
-                require_once plugin_dir_path( __FILE__ ) . 'partials/justified-api-authentication-admin-api-add-user.php';
+                require_once plugin_dir_path( __FILE__ ) . 'partials/justified-api-authentication-admin-api-add-key.php';
             }
         });
     }
@@ -176,8 +205,8 @@ class Justified_Api_Authentication_Admin {
      * Called via ('option_wp_'.get_current_blog_id().'_user_roles')
      */
     public function filter_api_user_roles($roles) {
-        unset($roles['api-read-only']);
-        unset($roles['api-read-write']);
+//        unset($roles['api-read-only']);
+//        unset($roles['api-read-write']);
 
         return $roles;
     }
@@ -191,68 +220,25 @@ class Justified_Api_Authentication_Admin {
     public function add_api_user_roles($blog_id) {
         $roles_set = get_option("api_roles_added");
 
+//        remove_role("api-read-only");
+//        remove_role("api-read-write");
+
         if(!$roles_set){
-            add_role("api-read-only", "Read Only API User", array('manage_options'));
-            add_role("api-read-write", "Read/Write API User", array('manage_options'));
+            add_role("api-read-only", "Read Only API User", array('read' => true, 'delete_posts' => false, 'edit_others_posts' => false));
+            add_role("api-read-write", "Read/Write API User", array('read' => true, 'delete_posts' => true, 'edit_others_posts' => true));
 
             update_option("api_roles_added", true);
         }
     }
 
     public function add_api_key_tables($blog_id){
-        Justified_Api_Authentication_Activator::create_database_schema($blog_id);
+        Justified_Api_Authentication_Activator::create_database_tables($blog_id);
         return $blog_id;
     }
 
-    public function add_api_roles_and_users($blog_id){
-        $api_user_password = wp_generate_password(256, true); //not sent to the user
-        $read_only_user_id = wp_create_user("$blog_id API Read only", $api_user_password);
-        $read_write_user_id = wp_create_user("$blog_id API Read Write", $api_user_password);
-
-        $read_only_user = new WP_User($read_only_user_id);
-        $read_only_user->add_role('api-read-only');
-        $read_write_user = new WP_User($read_write_user_id);
-        $read_write_user->add_role('api-read-write');
-
-        add_user_to_blog($blog_id, $read_only_user_id, 'api-read-only');
-        add_user_to_blog($blog_id, $read_write_user_id, 'api-read-write');
-    }
-
-    public function remove_blog_tables($blog_id){
-        // fixme: remove the tables we create in Justified_Api_Authentication_Activator
+    public function remove_api_key_tables($blog_id){
+        Justified_Api_Authentication_Activator::drop_database_tables($blog_id);
         return $blog_id;
     }
 
-    /**
-     * Using the edit_user_profile hook, add the API Keys form to the user edit form if they have the manage_options capability
-     */
-//    public function add_fields_to_user_admin($user) {
-//        if(!current_user_can('manage_options')){
-//            wp_die(__("You don't have permissions to manage this page"));
-//        }
-//
-//        $userdata = get_userdata($_GET['user_id']);
-//        $required_roles = array('administrator', 'contributer');
-//
-//        if($userdata && count(count(array_intersect($userdata->roles, $required_roles)))) {
-//            $has_api_key = get_user_option("has_api_key", $user->ID);
-//            if($has_api_key) {
-//                $keys = Justified_Api_Authentication_Keys::get_api_key($user->ID);
-//            }
-//            require_once plugin_dir_path( __FILE__ ) . 'partials/justified-api-authentication-user-form.php';
-//        }
-//    }
-//
-//    public function handle_user_admin_update($user_id) {
-//        $is_api_user = array_key_exists("api_user", $_POST) && $_POST["api_user"]=="on";
-//        $has_api_key = get_user_option("has_api_key", $user_id);
-//
-//        if($is_api_user && $is_api_user!=$has_api_key) {
-//            // create api keys if is_api_user is true, and we're updating this user option (new value != old value)
-//            Justified_Api_Authentication_Keys::generate_api_keys($user_id);
-//        }elseif(!$is_api_user && $has_api_key){
-//            // delete api keys
-//            Justified_Api_Authentication_Keys::delete_api_keys($user_id);
-//        }
-//    }
 }

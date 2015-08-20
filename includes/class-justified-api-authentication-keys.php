@@ -44,7 +44,7 @@ class Justified_Api_Authentication_Keys {
         $key = self::api_key();
         $table_name = $wpdb->prefix . "api_keys";
         $new_key = array('key_name' => $key_name, 'domain'=>$domain, 'api_key'=>$key, 'user_id'=>$user_id);
-        $inserted = $wpdb->insert($table_name, $new_key, array('%s', '%s', '%d'));
+        $inserted = $wpdb->insert($table_name, $new_key, array('%s', '%s', '%s', '%d'));
 
         return $inserted;
     }
@@ -59,6 +59,16 @@ class Justified_Api_Authentication_Keys {
         $table_name = $wpdb->prefix . "api_keys";
         $old_key = array('domain'=>$domain, 'user_id'=>$user_id);
         $wpdb->delete($table_name, $old_key, array('%s', '%d'));
+    }
+    public static function key_name_exists($key_name, $blog) {
+        global $wpdb;
+
+        $table_name = $wpdb->prefix . "api_keys";
+
+        $sql = "SELECT COUNT(*) FROM $table_name WHERE key_name = %s AND domain = %s";
+        $result = $wpdb->get_var($wpdb->prepare($sql, $key_name, $blog->domain));
+
+        return $result;
     }
 
     public static function api_key() {

@@ -18,30 +18,29 @@
 <div class="wrap">
     <h2>API Overview</h2>
 
-    <?php if(count($api_users)):?>
+    <?php if(count($api_keys)):?>
         <h3>API Keys</h3>
+        <p>
+            <a href="/wp-admin/options-general.php?page=justified-api-authentication-api-add-key">Add a new API Key</a>.
+        </p>
 
         <table class="wp-list-table widefat fixed striped pages">
             <thead>
             <tr>
-                <th>User ID</th>
-                <th>User    Email</th>
+                <th>Key Name</th>
                 <th>API Key</th>
             </tr>
             </thead>
-            <?php foreach($api_users as $api_user): ?>
+            <?php foreach($api_keys as $api_key): ?>
                 <tr>
-                    <td><?php echo $api_user['id'];?></td>
-                    <td><a href="/wp-admin/user-edit.php?user_id=<?php echo $api_user['id']; ?>"><?php echo $api_user['email'];?></a></td>
-                    <td><?php echo $api_user['api_key'];?></td>
+                    <td><a href="/wp-admin/options-general.php?page=justified-api-authentication-api-view-key&id=<?php echo $api_key['id'];?>"><?php echo $api_key['key_name'];?></a></td>
+                    <td><?php echo $api_key['api_key'];?></td>
                 </tr>
             <?php endforeach;?>
         </table>
-
-        <a href="/wp-admin/options-general.php?page=justified-api-authentication-api-add-user">Add a new API Key</a>
     <?php else: ?>
         <p>
-            You haven't added any API keys yet. <a href="/wp-admin/options-general.php?page=justified-api-authentication-api-add-user">Add a new API Key</a>.
+            You haven't added any API keys yet. <a href="/wp-admin/options-general.php?page=justified-api-authentication-api-add-key">Add a new API Key</a>.
         </p>
     <?php endif;?>
 </div>
