@@ -115,7 +115,7 @@ class Justified_Api_Authentication_Admin {
 	}
 
     public function api_menu_links() {
-        add_options_page("API Overview", "API Overview", "manage_options", $this->plugin_name."-api-overview-page", function(){
+        add_options_page("API Keys", "API Keys", "manage_options", $this->plugin_name."-api-keys", function(){
             global $wpdb;
 
             $request_domain = $_SERVER['HTTP_HOST'];
@@ -125,9 +125,10 @@ class Justified_Api_Authentication_Admin {
             $api_keys = array();
             $results = $wpdb->get_results($sql, OBJECT);
             foreach($results as $result) {
-                $api_keys[] = array('id' => $result->id, 'key_name' => $result->key_name, 'api_key' => $result->api_key);
+                $key_user = get_userdata($result->user_id);
+                $api_keys[] = array('id' => $result->id, 'user' => $key_user, 'key_name' => $result->key_name, 'api_key' => $result->api_key);
             }
-            require_once plugin_dir_path( __FILE__ ) . 'partials/justified-api-authentication-admin-api-details.php';
+            require_once plugin_dir_path( __FILE__ ) . 'partials/justified-api-authentication-admin-api-keys.php';
         });
 
         add_submenu_page(null, "View API Key", "View API Key", "manage_options", $this->plugin_name."-api-view-key", function(){
@@ -143,8 +144,11 @@ class Justified_Api_Authentication_Admin {
                 }
 
                 if($api_key) {
+                    // delete the key and the user account that we created to be associated with it
                     $wpdb->delete($table_name, array('id' => $_GET['id']));
-                    print '<div class="wrap"><div class="errors"><p>Key Deleted</p> <p><a href="/wp-admin/options-general.php?page=justified-api-authentication-api-overview-page">API Overview</a></p> </div></div>';
+                    do_action('delete_user', $api_key->user_id, null);
+
+                    print '<div class="wrap"><div class="errors"><p>Key Deleted</p> <p><a href="/wp-admin/options-general.php?page=justified-api-authentication-api-keys">API Keys</a></p> </div></div>';
                     exit;
                 }else {
                     print '<div class="wrap"><div class="errors"><p>Key not found</p></div></div>';
@@ -163,7 +167,8 @@ class Justified_Api_Authentication_Admin {
                 }
 
                 $blog = get_blog_details(get_current_blog_id());
-                if(!$_POST['key_name'] || Justified_Api_Authentication_Keys::key_name_exists($_POST['key_name'], $blog)){
+                $new_key_name = $_POST['key_name'];
+                if(!$new_key_name || Justified_Api_Authentication_Keys::key_name_exists($new_key_name, $blog)){
                     echo '<div class="wrap"><div class="errors"><p>Unique key name required</p></div></div>';
                     require_once plugin_dir_path( __FILE__ ) . 'partials/justified-api-authentication-admin-api-add-key.php';
                     return;
@@ -189,7 +194,6 @@ class Justified_Api_Authentication_Admin {
                     echo "Couldn't generate API key - please contact support";
                     return;
                 }
-//            }elseif(){
             }else {
                 require_once plugin_dir_path( __FILE__ ) . 'partials/justified-api-authentication-admin-api-add-key.php';
             }
@@ -220,12 +224,55 @@ class Justified_Api_Authentication_Admin {
     public function add_api_user_roles($blog_id) {
         $roles_set = get_option("api_roles_added");
 
-//        remove_role("api-read-only");
-//        remove_role("api-read-write");
+//        global $wp_roles;
+//        ksort($wp_roles->roles['editor']['capabilities']);
+//        ksort($wp_roles->roles['administrator']['capabilities']);
+//        ksort($wp_roles->roles['contributor']['capabilities']);
+//
+//        echo "<pre>";
+//        print_r($wp_roles->roles['editor']['capabilities']);
+//        echo "</pre>";
+//        exit;
+        delete_option("api_roles_added");
+        remove_role("api-read-only");
+        remove_role("api-read-write");
 
         if(!$roles_set){
-            add_role("api-read-only", "Read Only API User", array('read' => true, 'delete_posts' => false, 'edit_others_posts' => false));
-            add_role("api-read-write", "Read/Write API User", array('read' => true, 'delete_posts' => true, 'edit_others_posts' => true));
+            add_role("api-read-only", "Read Only API User", array(
+                'read' => true
+            ));
+
+            add_role("api-read-write", "Read/Write API User", array(
+                'delete_attachments' => true,
+                'delete_others_attachments' => true,
+                'delete_others_pages' => true,
+                'delete_others_posts' => true,
+                'delete_pages' => true,
+                'delete_posts' => true,
+                'delete_private_pages' => true,
+                'delete_private_posts' => true,
+                'delete_published_pages' => true,
+                'delete_published_posts' => true,
+                'edit_attachments' => true,
+                'edit_others_attachments' => true,
+                'edit_others_pages' => true,
+                'edit_others_posts' => true,
+                'edit_pages' => true,
+                'edit_posts' => true,
+                'edit_private_pages' => true,
+                'edit_private_posts' => true,
+                'edit_published_pages' => true,
+                'edit_published_posts' => true,
+                'manage_categories' => true,
+                'publish_pages' => true,
+                'publish_posts' => true,
+                'read' => true,
+                'read_others_attachments' => true,
+                'read_private_pages' => true,
+                'read_private_posts' => true,
+                'unfiltered_html' => true,
+                'upload_files' => true
+            ));
 
             update_option("api_roles_added", true);
         }

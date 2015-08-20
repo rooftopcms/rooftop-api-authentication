@@ -24,7 +24,7 @@
                     API Key name
                 </th>
                 <td>
-                    <input type="text" name="key_name" placeholder="iOS API Key" />
+                    <input type="text" name="key_name" placeholder="iOS API Key" value="<?php defined('$new_key_name') ? $new_key_name : '' ?>"/>
                 </td>
             </tr>
             <tr>

@@ -52,16 +52,6 @@ class Justified_Api_Authentication_Public {
 		$this->plugin_name = $plugin_name;
 		$this->version = $version;
 
-//        $debug_tags = array();
-//        add_action( 'all', function ( $tag ) {
-//            global $debug_tags;
-//            if ( in_array( $tag, $debug_tags ) ) {
-//                return;
-//            }
-//            echo "<pre>" . $tag . "</pre>";
-//            $debug_tags[] = $tag;
-//        } );
-//        print_r($debug_tags);
 	}
 
 	/**
@@ -140,11 +130,21 @@ class Justified_Api_Authentication_Public {
             global $wpdb;
 
             $table_name = $wpdb->prefix . "api_keys";
-            $sql = "SELECT domain, api_key, user_id FROM $table_name WHERE domain = '$request_domain' AND api_key = '$api_key'";
+            $sql = "SELECT id, key_name, domain, api_key, user_id FROM $table_name WHERE domain = '$request_domain' AND api_key = '$api_key'";
             $result = $wpdb->get_row($sql, OBJECT);
 
             // set_current_user should return either a valid user ID, or a WP_Error
             if($result) {
+                if(defined("JUSTIFIED_PREVIEW_MODE") && true == JUSTIFIED_PREVIEW_MODE && !$_POST) {
+                    // temporarily elevate this user's credentials so that they can view others' posts
+                    $this->tmp_user = get_userdata($result->user_id);
+                    $this->tmp_user->add_cap('edit_others_posts', true);
+
+                    add_action('shutdown', function(){
+                        $this->tmp_user->remove_cap('edit_others_posts');
+                    });
+                }
+
                 $wp_rest_auth_error = $result->user_id;
             }else {
                 // we were given a key, but it's wrong, or invalid for this domain
