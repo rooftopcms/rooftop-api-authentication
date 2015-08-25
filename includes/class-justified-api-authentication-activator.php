@@ -74,5 +74,6 @@ EOSQL;
 DROP TABLE $table_name;
 EOSQL;
 
+        dbDelta($sql);
     }
 }
