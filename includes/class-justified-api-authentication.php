@@ -161,7 +161,6 @@ class Justified_Api_Authentication {
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
 
         // admin pages
-        $this->loader->add_filter('option_wp_'.get_current_blog_id().'_user_roles', $plugin_admin, 'filter_api_user_roles');
         $this->loader->add_action('admin_menu', $plugin_admin, 'api_menu_links');
 
         $this->loader->add_filter('admin_init', $plugin_admin, 'add_api_user_roles');

@@ -55,7 +55,6 @@ class Justified_Api_Authentication_Admin {
 		$this->plugin_name = $plugin_name;
 		$this->version = $version;
 
-
 //        $debug_tags = array();
 //        add_action( 'all', function ( $tag ) {
 //            global $debug_tags;
@@ -201,21 +200,6 @@ class Justified_Api_Authentication_Admin {
     }
 
     /**
-     * @param $roles
-     * @return mixed
-     *
-     * When rendering the user-edit form, remove the API specific user roles from the roles that are available in the dropdown.
-     *
-     * Called via ('option_wp_'.get_current_blog_id().'_user_roles')
-     */
-    public function filter_api_user_roles($roles) {
-//        unset($roles['api-read-only']);
-//        unset($roles['api-read-write']);
-
-        return $roles;
-    }
-
-    /**
      * Add the roles required for a valid 'api user' account - these roles shouldn't be visible in the admin area, and
      * are removed by a filter ('option_wp_'.get_current_blog_id().'_user_roles')
      *
@@ -225,16 +209,9 @@ class Justified_Api_Authentication_Admin {
         $roles_set = get_option("api_roles_added");
 
 //        global $wp_roles;
-//        ksort($wp_roles->roles['editor']['capabilities']);
-//        ksort($wp_roles->roles['administrator']['capabilities']);
-//        ksort($wp_roles->roles['contributor']['capabilities']);
 //        delete_option("api_roles_added");
 //        remove_role("api-read-only");
 //        remove_role("api-read-write");
-//
-//        echo "<pre>";
-//        print_r($wp_roles->roles['editor']['capabilities']);
-//        echo "</pre>";
 //        exit;
 
         if(!$roles_set){
