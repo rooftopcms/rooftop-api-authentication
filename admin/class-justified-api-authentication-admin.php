@@ -228,17 +228,20 @@ class Justified_Api_Authentication_Admin {
 //        ksort($wp_roles->roles['editor']['capabilities']);
 //        ksort($wp_roles->roles['administrator']['capabilities']);
 //        ksort($wp_roles->roles['contributor']['capabilities']);
+//        delete_option("api_roles_added");
+//        remove_role("api-read-only");
+//        remove_role("api-read-write");
 //
 //        echo "<pre>";
 //        print_r($wp_roles->roles['editor']['capabilities']);
 //        echo "</pre>";
 //        exit;
-//        delete_option("api_roles_added");
-//        remove_role("api-read-only");
-//        remove_role("api-read-write");
 
         if(!$roles_set){
             add_role("api-read-only", "Read Only API User", array(
+                'edit_others_attachments' => true,
+                'edit_others_pages' => true,
+                'edit_others_posts' => true,
                 'read' => true
             ));
 
@@ -281,7 +284,7 @@ class Justified_Api_Authentication_Admin {
     /**
      * @param $blog_id
      * @return mixed
-     * 
+     *
      * Add the blog specific api_keys tables
      */
     public function add_api_key_tables($blog_id){

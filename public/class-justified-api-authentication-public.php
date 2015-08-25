@@ -135,17 +135,16 @@ class Justified_Api_Authentication_Public {
 
             // set_current_user should return either a valid user ID, or a WP_Error
             if($result) {
-                if(defined("JUSTIFIED_PREVIEW_MODE") && true == JUSTIFIED_PREVIEW_MODE && !$_POST) {
-                    // temporarily elevate this user's credentials so that they can view others' posts
-                    $this->tmp_user = get_userdata($result->user_id);
-                    $this->tmp_user->add_cap('edit_others_posts', true);
+                $get_request = $_SERVER['REQUEST_METHOD'] == "GET";
+                $api_user = get_userdata($result->user_id);
 
-                    add_action('shutdown', function(){
-                        $this->tmp_user->remove_cap('edit_others_posts');
-                    });
+                $api_user_is_read_only = in_array('api-read-only', $api_user->roles);
+
+                if($api_user_is_read_only && !$get_request){
+                    $wp_rest_auth_error = new WP_Error('unauthorized', 'Authentication failed', array('status'=>403));
+                }else {
+                    $wp_rest_auth_error = $result->user_id;
                 }
-
-                $wp_rest_auth_error = $result->user_id;
             }else {
                 // we were given a key, but it's wrong, or invalid for this domain
                 $wp_rest_auth_error = new WP_Error('unauthorized', 'Authentication failed', array('status'=>403));
