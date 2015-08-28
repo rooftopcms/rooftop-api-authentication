@@ -17,7 +17,7 @@
 <div class="wrap">
     <h1>Add new API key</h1>
 
-    <form action="/wp-admin/options-general.php?page=rooftop-api-authentication-api-add-key" method="post">
+    <form action="?page=rooftop-api-authentication-new-api-key" method="post">
         <table class="form-table">
             <tr>
                 <th scope="row">

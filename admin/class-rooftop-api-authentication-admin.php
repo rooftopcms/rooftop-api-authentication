@@ -114,51 +114,52 @@ class Rooftop_Api_Authentication_Admin {
 	}
 
     public function api_menu_links() {
-        add_options_page("API Keys", "API Keys", "manage_options", $this->plugin_name."-api-keys", function(){
+        add_menu_page("Rooftop CMS", "Rooftop CMS", "manage_options", $this->plugin_name."-overview", function(){
+        });
+        add_submenu_page($this->plugin_name."-overview", "API Keys", "API Keys", "manage_options", $this->plugin_name."-overview", function() {
             global $wpdb;
 
             $request_domain = $_SERVER['HTTP_HOST'];
             $table_name = $wpdb->prefix . "api_keys";
-            $sql = "SELECT id, key_name, domain, api_key, user_id FROM $table_name WHERE domain = '$request_domain';";
 
-            $api_keys = array();
-            $results = $wpdb->get_results($sql, OBJECT);
-            foreach($results as $result) {
-                $key_user = get_userdata($result->user_id);
-                $api_keys[] = array('id' => $result->id, 'user' => $key_user, 'key_name' => $result->key_name, 'api_key' => $result->api_key);
-            }
-            require_once plugin_dir_path( __FILE__ ) . 'partials/rooftop-api-authentication-admin-api-keys.php';
-        });
+            if(array_key_exists('id', $_GET)){
+                $blog = get_blog_details(get_current_blog_id());
+                $api_key = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table_name WHERE domain = %s and id = %d", array($blog->domain, $_GET['id'])));
 
-        add_submenu_page(null, "View API Key", "View API Key", "manage_options", $this->plugin_name."-api-view-key", function(){
-            global $wpdb;
-            $table_name = $table_name = $wpdb->prefix . "api_keys";
-            $blog = get_blog_details(get_current_blog_id());
-            $api_key = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table_name WHERE domain = %s and id = %d", array($blog->domain, $_GET['id'])));
+                // if we have an ID in the query string and it's a POST request, the user is trying to delete this key
+                if($_POST){
+                    if(!isset($_POST['api-field-token']) || !wp_verify_nonce($_POST['api-field-token'], 'rooftop-api-authentication-api-view-key')) {
+                        print '<div class="wrap"><div class="errors"><p>Form token not verified</p></div></div>';
+                        exit;
+                    }
 
-            if($_POST){
-                if(!isset($_POST['api-field-token']) || !wp_verify_nonce($_POST['api-field-token'], 'rooftop-api-authentication-api-view-key')) {
-                    print '<div class="wrap"><div class="errors"><p>Form token not verified</p></div></div>';
-                    exit;
-                }
+                    if($api_key) {
+                        // delete the key and the user account that we created to be associated with it
+                        $wpdb->delete($table_name, array('id' => $_GET['id']));
+                        do_action('delete_user', $api_key->user_id, null);
 
-                if($api_key) {
-                    // delete the key and the user account that we created to be associated with it
-                    $wpdb->delete($table_name, array('id' => $_GET['id']));
-                    do_action('delete_user', $api_key->user_id, null);
-
-                    print '<div class="wrap"><div class="errors"><p>Key Deleted</p> <p><a href="/wp-admin/options-general.php?page=rooftop-api-authentication-api-keys">API Keys</a></p> </div></div>';
-                    exit;
+                        print '<div class="wrap"><div class="errors"><p>Key Deleted</p> <p><a href="?page=rooftop-api-authentication-overview">API Keys</a></p> </div></div>';
+                        exit;
+                    }else {
+                        print '<div class="wrap"><div class="errors"><p>Key not found</p></div></div>';
+                        exit;
+                    }
                 }else {
-                    print '<div class="wrap"><div class="errors"><p>Key not found</p></div></div>';
-                    exit;
+                    // render the api key info & form
+                    require_once plugin_dir_path( __FILE__ ) . 'partials/rooftop-api-authentication-admin-api-view-key.php';
                 }
             }else {
-                require_once plugin_dir_path( __FILE__ ) . 'partials/rooftop-api-authentication-admin-api-view-key.php';
+                $api_keys = array();
+                $sql = "SELECT id, key_name, domain, api_key, user_id FROM $table_name WHERE domain = '$request_domain';";
+                $results = $wpdb->get_results($sql, OBJECT);
+                foreach($results as $result) {
+                    $key_user = get_userdata($result->user_id);
+                    $api_keys[] = array('id' => $result->id, 'user' => $key_user, 'key_name' => $result->key_name, 'api_key' => $result->api_key);
+                }
+                require_once plugin_dir_path( __FILE__ ) . 'partials/rooftop-api-authentication-admin-api-keys.php';
             }
         });
-
-        add_submenu_page(null, "Add API Key", "Add API Key", "manage_options", $this->plugin_name."-api-add-key", function(){
+        add_submenu_page($this->plugin_name."-overview", "New API Key", "New API Key", "manage_options", $this->plugin_name."-new-api-key", function(){
             if($_POST){
                 if(!isset($_POST['api-field-token']) || !wp_verify_nonce($_POST['api-field-token'], 'rooftop-api-authentication-api-add-key')) {
                     print '<div class="wrap"><div class="errors"><p>Form token not verified</p></div></div>';
@@ -197,6 +198,7 @@ class Rooftop_Api_Authentication_Admin {
                 require_once plugin_dir_path( __FILE__ ) . 'partials/rooftop-api-authentication-admin-api-add-key.php';
             }
         });
+
     }
 
     /**

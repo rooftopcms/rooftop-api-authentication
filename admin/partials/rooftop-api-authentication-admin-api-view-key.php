@@ -21,6 +21,10 @@
 
         <?php wp_nonce_field( 'rooftop-api-authentication-api-view-key', 'api-field-token' ); ?>
 
+        <p>
+            <strong><?php echo $api_key->key_name;?></strong>: <?php echo $api_key->api_key;?>.
+        </p>
+
         <p class="submit">
             <?php submit_button( 'Delete', 'delete button-primary' );?>
         </p>
