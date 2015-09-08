@@ -54,17 +54,6 @@ class Rooftop_Api_Authentication_Admin {
 
 		$this->plugin_name = $plugin_name;
 		$this->version = $version;
-
-//        $debug_tags = array();
-//        add_action( 'all', function ( $tag ) {
-//            global $debug_tags;
-//            if ( in_array( $tag, $debug_tags ) ) {
-//                return;
-//            }
-//            echo "<pre>" . $tag . "</pre>";
-//            $debug_tags[] = $tag;
-//        } );
-//        print_r($debug_tags);
 	}
 
 	/**

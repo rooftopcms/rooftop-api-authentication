@@ -60,7 +60,7 @@
         </table>
     <?php else: ?>
         <p>
-            You haven't added any API keys yet. <a href="?page=rooftop-api-authentication-overview">Add a new API Key</a>.
+            You haven't added any API keys yet. <a href="?page=rooftop-api-authentication-new-api-key">Add a new API Key</a>.
         </p>
     <?php endif;?>
 </div>
