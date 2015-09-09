@@ -18,7 +18,7 @@
     <h1>API key <strong><?php echo $api_key->key_name ?></strong></h1>
 
     <form method="post">
-
+        <input type="hidden" name="method" value="delete" />
         <?php wp_nonce_field( 'rooftop-api-authentication-api-view-key', 'api-field-token' ); ?>
 
         <p>

@@ -18,7 +18,7 @@
 <div class="wrap">
     <h2>
         API Keys
-        <a href="?page=rooftop-api-authentication-new-api-key" class="page-title-action">Add New</a>
+        <a href="?page=rooftop-api-authentication-overview&new=true" class="page-title-action">Add New</a>
     </h2>
 
     <?php if(count($api_keys)):?>

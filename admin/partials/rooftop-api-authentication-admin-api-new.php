@@ -17,7 +17,7 @@
 <div class="wrap">
     <h1>Add new API key</h1>
 
-    <form action="?page=rooftop-api-authentication-new-api-key" method="post">
+    <form action="?page=rooftop-api-authentication-overview" method="post">
         <table class="form-table">
             <tr>
                 <th scope="row">
