@@ -105,7 +105,7 @@ class Rooftop_Api_Authentication_Admin {
     public function api_menu_links() {
         $rooftop_api_menu_slug = "rooftop-api-authentication-overview";
 
-        add_menu_page("Rooftop CMS", "Rooftop sCMS", "manage_options", $rooftop_api_menu_slug, function(){
+        add_menu_page("Rooftop CMS", "Rooftop CMS", "manage_options", $rooftop_api_menu_slug, function(){
         });
         add_submenu_page($this->plugin_name."-overview", "API Keys", "API Keys", "manage_options", $this->plugin_name."-overview", function() {
             if($_POST && array_key_exists('method', $_POST)) {
