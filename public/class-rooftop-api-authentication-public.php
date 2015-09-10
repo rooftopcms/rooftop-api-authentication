@@ -123,7 +123,7 @@ class Rooftop_Api_Authentication_Public {
 
         // check that we've been given an api key header
         $request_domain = $_SERVER['HTTP_HOST'];
-        $api_key = array_key_exists('HTTP_API_KEY', $_SERVER) ? $_SERVER['HTTP_API_KEY'] : null;
+        $api_key = array_key_exists('HTTP_API_TOKEN', $_SERVER) ? $_SERVER['HTTP_API_TOKEN'] : null;
 
         if($api_key) {
             // look up the API key against in the api keys table, along with the request domain
