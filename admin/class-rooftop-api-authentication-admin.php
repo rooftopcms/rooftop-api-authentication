@@ -136,7 +136,7 @@ class Rooftop_Api_Authentication_Admin {
         });
     }
 
-    public function api_keys_index() {
+    private function api_keys_index() {
         global $wpdb;
 
         $request_domain = $_SERVER['HTTP_HOST'];
@@ -154,11 +154,11 @@ class Rooftop_Api_Authentication_Admin {
         require_once plugin_dir_path( __FILE__ ) . 'partials/rooftop-api-authentication-admin-api-index.php';
     }
 
-    public function api_keys_edit() {
+    private function api_keys_edit() {
         require_once plugin_dir_path( __FILE__ ) . 'partials/rooftop-api-authentication-admin-api-new.php';
     }
 
-    public function api_keys_show() {
+    private function api_keys_show() {
         global $wpdb;
 
         $table_name = $wpdb->prefix . "api_keys";
@@ -168,7 +168,7 @@ class Rooftop_Api_Authentication_Admin {
         require_once plugin_dir_path( __FILE__ ) . 'partials/rooftop-api-authentication-admin-api-show.php';
     }
 
-    public function api_keys_create() {
+    private function api_keys_create() {
         if(!isset($_POST['api-field-token']) || !wp_verify_nonce($_POST['api-field-token'], 'rooftop-api-authentication-api-add-key')) {
             print '<div class="wrap"><div class="errors"><p>Form token not verified</p></div></div>';
             exit;
@@ -204,7 +204,7 @@ class Rooftop_Api_Authentication_Admin {
         }
     }
 
-    public function api_keys_delete() {
+    private function api_keys_delete() {
         global $wpdb;
 
         $table_name = $wpdb->prefix . "api_keys";
