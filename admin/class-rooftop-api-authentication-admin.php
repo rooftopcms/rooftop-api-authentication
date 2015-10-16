@@ -6,8 +6,8 @@
  * @link       http://errorstudio.co.uk
  * @since      1.0.0
  *
- * @package    Justified_Api_Authentication
- * @subpackage Justified_Api_Authentication/admin
+ * @package    Rooftop_Api_Authentication
+ * @subpackage Rooftop_Api_Authentication/admin
  */
 
 /**
@@ -16,14 +16,14 @@
  * Defines the plugin name, version, and two examples hooks for how to
  * enqueue the admin-specific stylesheet and JavaScript.
  *
- * @package    Justified_Api_Authentication
- * @subpackage Justified_Api_Authentication/admin
+ * @package    Rooftop_Api_Authentication
+ * @subpackage Rooftop_Api_Authentication/admin
  * @author     Error Studio <info@errorstudio.co.uk>
  */
 
-require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-justified-api-authentication-activator.php';
+require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-rooftop-api-authentication-activator.php';
 
-class Justified_Api_Authentication_Admin {
+class Rooftop_Api_Authentication_Admin {
 
 	/**
 	 * The ID of this plugin.
@@ -78,15 +78,15 @@ class Justified_Api_Authentication_Admin {
 		 * This function is provided for demonstration purposes only.
 		 *
 		 * An instance of this class should be passed to the run() function
-		 * defined in Justified_Api_Authentication_Loader as all of the hooks are defined
+		 * defined in Rooftop_Api_Authentication_Loader as all of the hooks are defined
 		 * in that particular class.
 		 *
-		 * The Justified_Api_Authentication_Loader will then create the relationship
+		 * The Rooftop_Api_Authentication_Loader will then create the relationship
 		 * between the defined hooks and the functions defined in this
 		 * class.
 		 */
 
-		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/justified-api-authentication-admin.css', array(), $this->version, 'all' );
+		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/rooftop-api-authentication-admin.css', array(), $this->version, 'all' );
 
 	}
 
@@ -101,15 +101,15 @@ class Justified_Api_Authentication_Admin {
 		 * This function is provided for demonstration purposes only.
 		 *
 		 * An instance of this class should be passed to the run() function
-		 * defined in Justified_Api_Authentication_Loader as all of the hooks are defined
+		 * defined in Rooftop_Api_Authentication_Loader as all of the hooks are defined
 		 * in that particular class.
 		 *
-		 * The Justified_Api_Authentication_Loader will then create the relationship
+		 * The Rooftop_Api_Authentication_Loader will then create the relationship
 		 * between the defined hooks and the functions defined in this
 		 * class.
 		 */
 
-		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/justified-api-authentication-admin.js', array( 'jquery' ), $this->version, false );
+		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/rooftop-api-authentication-admin.js', array( 'jquery' ), $this->version, false );
 
 	}
 
@@ -127,7 +127,7 @@ class Justified_Api_Authentication_Admin {
                 $key_user = get_userdata($result->user_id);
                 $api_keys[] = array('id' => $result->id, 'user' => $key_user, 'key_name' => $result->key_name, 'api_key' => $result->api_key);
             }
-            require_once plugin_dir_path( __FILE__ ) . 'partials/justified-api-authentication-admin-api-keys.php';
+            require_once plugin_dir_path( __FILE__ ) . 'partials/rooftop-api-authentication-admin-api-keys.php';
         });
 
         add_submenu_page(null, "View API Key", "View API Key", "manage_options", $this->plugin_name."-api-view-key", function(){
@@ -137,7 +137,7 @@ class Justified_Api_Authentication_Admin {
             $api_key = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table_name WHERE domain = %s and id = %d", array($blog->domain, $_GET['id'])));
 
             if($_POST){
-                if(!isset($_POST['api-field-token']) || !wp_verify_nonce($_POST['api-field-token'], 'justified-api-authentication-api-view-key')) {
+                if(!isset($_POST['api-field-token']) || !wp_verify_nonce($_POST['api-field-token'], 'rooftop-api-authentication-api-view-key')) {
                     print '<div class="wrap"><div class="errors"><p>Form token not verified</p></div></div>';
                     exit;
                 }
@@ -147,29 +147,29 @@ class Justified_Api_Authentication_Admin {
                     $wpdb->delete($table_name, array('id' => $_GET['id']));
                     do_action('delete_user', $api_key->user_id, null);
 
-                    print '<div class="wrap"><div class="errors"><p>Key Deleted</p> <p><a href="/wp-admin/options-general.php?page=justified-api-authentication-api-keys">API Keys</a></p> </div></div>';
+                    print '<div class="wrap"><div class="errors"><p>Key Deleted</p> <p><a href="/wp-admin/options-general.php?page=rooftop-api-authentication-api-keys">API Keys</a></p> </div></div>';
                     exit;
                 }else {
                     print '<div class="wrap"><div class="errors"><p>Key not found</p></div></div>';
                     exit;
                 }
             }else {
-                require_once plugin_dir_path( __FILE__ ) . 'partials/justified-api-authentication-admin-api-view-key.php';
+                require_once plugin_dir_path( __FILE__ ) . 'partials/rooftop-api-authentication-admin-api-view-key.php';
             }
         });
 
         add_submenu_page(null, "Add API Key", "Add API Key", "manage_options", $this->plugin_name."-api-add-key", function(){
             if($_POST){
-                if(!isset($_POST['api-field-token']) || !wp_verify_nonce($_POST['api-field-token'], 'justified-api-authentication-api-add-key')) {
+                if(!isset($_POST['api-field-token']) || !wp_verify_nonce($_POST['api-field-token'], 'rooftop-api-authentication-api-add-key')) {
                     print '<div class="wrap"><div class="errors"><p>Form token not verified</p></div></div>';
                     exit;
                 }
 
                 $blog = get_blog_details(get_current_blog_id());
                 $new_key_name = $_POST['key_name'];
-                if(!$new_key_name || Justified_Api_Authentication_Keys::key_name_exists($new_key_name, $blog)){
+                if(!$new_key_name || Rooftop_Api_Authentication_Keys::key_name_exists($new_key_name, $blog)){
                     echo '<div class="wrap"><div class="errors"><p>Unique key name required</p></div></div>';
-                    require_once plugin_dir_path( __FILE__ ) . 'partials/justified-api-authentication-admin-api-add-key.php';
+                    require_once plugin_dir_path( __FILE__ ) . 'partials/rooftop-api-authentication-admin-api-add-key.php';
                     return;
                 }
 
@@ -185,16 +185,16 @@ class Justified_Api_Authentication_Admin {
                 $api_user->add_role($role->name);
                 add_user_to_blog($blog_id, $api_user_id, $role->name);
 
-                if($api_user_id && Justified_Api_Authentication_Keys::generate_api_key($api_key_name, $api_user_id)) {
+                if($api_user_id && Rooftop_Api_Authentication_Keys::generate_api_key($api_key_name, $api_user_id)) {
                     echo '<div class="wrap"><p>New key added</p></div>';
-                    require_once plugin_dir_path( __FILE__ ) . 'partials/justified-api-authentication-admin-api-add-key.php';
+                    require_once plugin_dir_path( __FILE__ ) . 'partials/rooftop-api-authentication-admin-api-add-key.php';
                     return;
                 }else {
                     echo "Couldn't generate API key - please contact support";
                     return;
                 }
             }else {
-                require_once plugin_dir_path( __FILE__ ) . 'partials/justified-api-authentication-admin-api-add-key.php';
+                require_once plugin_dir_path( __FILE__ ) . 'partials/rooftop-api-authentication-admin-api-add-key.php';
             }
         });
     }
@@ -265,7 +265,7 @@ class Justified_Api_Authentication_Admin {
      * Add the blog specific api_keys tables
      */
     public function add_api_key_tables($blog_id){
-        Justified_Api_Authentication_Activator::create_database_tables($blog_id);
+        Rooftop_Api_Authentication_Activator::create_database_tables($blog_id);
         return $blog_id;
     }
 
@@ -276,7 +276,7 @@ class Justified_Api_Authentication_Admin {
      * remove the blog specific api_keys tables
      */
     public function remove_api_key_tables($blog_id){
-        Justified_Api_Authentication_Activator::drop_database_tables($blog_id);
+        Rooftop_Api_Authentication_Activator::drop_database_tables($blog_id);
         return $blog_id;
     }
 

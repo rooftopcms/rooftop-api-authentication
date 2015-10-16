@@ -8,8 +8,8 @@
  * @link       http://errorstudio.co.uk
  * @since      1.0.0
  *
- * @package    Justified_Api_Authentication
- * @subpackage Justified_Api_Authentication/admin/partials
+ * @package    Rooftop_Api_Authentication
+ * @subpackage Rooftop_Api_Authentication/admin/partials
  */
 ?>
 
@@ -17,7 +17,7 @@
 <div class="wrap">
     <h1>Add new API key</h1>
 
-    <form action="/wp-admin/options-general.php?page=justified-api-authentication-api-add-key" method="post">
+    <form action="/wp-admin/options-general.php?page=rooftop-api-authentication-api-add-key" method="post">
         <table class="form-table">
             <tr>
                 <th scope="row">
@@ -40,7 +40,7 @@
             </tr>
         </table>
 
-        <?php wp_nonce_field( 'justified-api-authentication-api-add-key', 'api-field-token' ); ?>
+        <?php wp_nonce_field( 'rooftop-api-authentication-api-add-key', 'api-field-token' ); ?>
 
         <p class="submit">
             <input type="submit" value="Add API Key" class="button button-primary" />

@@ -8,8 +8,8 @@
  * @link       http://errorstudio.co.uk
  * @since      1.0.0
  *
- * @package    Justified_Api_Authentication
- * @subpackage Justified_Api_Authentication/admin/partials
+ * @package    Rooftop_Api_Authentication
+ * @subpackage Rooftop_Api_Authentication/admin/partials
  */
 ?>
 
@@ -19,7 +19,7 @@
 
     <form method="post">
 
-        <?php wp_nonce_field( 'justified-api-authentication-api-view-key', 'api-field-token' ); ?>
+        <?php wp_nonce_field( 'rooftop-api-authentication-api-view-key', 'api-field-token' ); ?>
 
         <p class="submit">
             <?php submit_button( 'Delete', 'delete button-primary' );?>

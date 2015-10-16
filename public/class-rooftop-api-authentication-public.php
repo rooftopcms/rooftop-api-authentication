@@ -6,8 +6,8 @@
  * @link       http://errorstudio.co.uk
  * @since      1.0.0
  *
- * @package    Justified_Api_Authentication
- * @subpackage Justified_Api_Authentication/public
+ * @package    Rooftop_Api_Authentication
+ * @subpackage Rooftop_Api_Authentication/public
  */
 
 /**
@@ -16,11 +16,11 @@
  * Defines the plugin name, version, and two examples hooks for how to
  * enqueue the admin-specific stylesheet and JavaScript.
  *
- * @package    Justified_Api_Authentication
- * @subpackage Justified_Api_Authentication/public
+ * @package    Rooftop_Api_Authentication
+ * @subpackage Rooftop_Api_Authentication/public
  * @author     Error Studio <info@errorstudio.co.uk>
  */
-class Justified_Api_Authentication_Public {
+class Rooftop_Api_Authentication_Public {
 
 	/**
 	 * The ID of this plugin.
@@ -65,15 +65,15 @@ class Justified_Api_Authentication_Public {
 		 * This function is provided for demonstration purposes only.
 		 *
 		 * An instance of this class should be passed to the run() function
-		 * defined in Justified_Api_Authentication_Loader as all of the hooks are defined
+		 * defined in Rooftop_Api_Authentication_Loader as all of the hooks are defined
 		 * in that particular class.
 		 *
-		 * The Justified_Api_Authentication_Loader will then create the relationship
+		 * The Rooftop_Api_Authentication_Loader will then create the relationship
 		 * between the defined hooks and the functions defined in this
 		 * class.
 		 */
 
-		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/justified-api-authentication-public.css', array(), $this->version, 'all' );
+		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/rooftop-api-authentication-public.css', array(), $this->version, 'all' );
 
 	}
 
@@ -88,15 +88,15 @@ class Justified_Api_Authentication_Public {
 		 * This function is provided for demonstration purposes only.
 		 *
 		 * An instance of this class should be passed to the run() function
-		 * defined in Justified_Api_Authentication_Loader as all of the hooks are defined
+		 * defined in Rooftop_Api_Authentication_Loader as all of the hooks are defined
 		 * in that particular class.
 		 *
-		 * The Justified_Api_Authentication_Loader will then create the relationship
+		 * The Rooftop_Api_Authentication_Loader will then create the relationship
 		 * between the defined hooks and the functions defined in this
 		 * class.
 		 */
 
-		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/justified-api-authentication-public.js', array( 'jquery' ), $this->version, false );
+		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/rooftop-api-authentication-public.js', array( 'jquery' ), $this->version, false );
 
 	}
 
@@ -185,7 +185,7 @@ class Justified_Api_Authentication_Public {
      * if we're in preview mode, return any post which is visible, or intended to be visible (ie not deleted)
      */
     public function adjust_query_for_preview_mode($query_args){
-        if(defined("JUSTIFIED_PREVIEW_MODE") && true == JUSTIFIED_PREVIEW_MODE) {
+        if(defined("ROOFTOP_PREVIEW_MODE") && true == ROOFTOP_PREVIEW_MODE) {
             $query_args['post_status'] = array('publish', 'draft', 'scheduled', 'pending');
         }
 

@@ -9,8 +9,8 @@
  * @link       http://errorstudio.co.uk
  * @since      1.0.0
  *
- * @package    Justified_Api_Authentication
- * @subpackage Justified_Api_Authentication/includes
+ * @package    Rooftop_Api_Authentication
+ * @subpackage Rooftop_Api_Authentication/includes
  */
 
 /**
@@ -23,11 +23,11 @@
  * version of the plugin.
  *
  * @since      1.0.0
- * @package    Justified_Api_Authentication_Keys
- * @subpackage Justified_Api_Authentication/includes
+ * @package    Rooftop_Api_Authentication_Keys
+ * @subpackage Rooftop_Api_Authentication/includes
  * @author     Error Studio <info@errorstudio.co.uk>
  */
-class Justified_Api_Authentication_Keys {
+class Rooftop_Api_Authentication_Keys {
     public static function generate_api_key($key_name, $user_id){
         global $wpdb;
 

@@ -22,7 +22,7 @@
  * @link       http://errorstudio.co.uk
  * @since      1.0.0
  *
- * @package    Justified_Api_Authentication
+ * @package    Rooftop_Api_Authentication
  */
 
 // If uninstall not called from WordPress, then exit.
