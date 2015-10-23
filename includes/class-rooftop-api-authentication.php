@@ -160,13 +160,14 @@ class Rooftop_Api_Authentication {
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
 
-        // admin pages
         $this->loader->add_action('admin_menu', $plugin_admin, 'api_menu_links');
-
         $this->loader->add_filter('admin_init', $plugin_admin, 'add_api_user_roles');
         $this->loader->add_action('wpmu_new_blog', $plugin_admin, 'add_api_key_tables');
+
+        $this->loader->add_action('delete_blog', $plugin_admin, 'remove_users_from_blog');
         $this->loader->add_action('delete_blog', $plugin_admin, 'remove_api_key_tables');
         $this->loader->add_action('delete_user', $plugin_admin, 'remove_user_from_network');
+
 	}
 
 	/**
