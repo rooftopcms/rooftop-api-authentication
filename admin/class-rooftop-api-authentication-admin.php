@@ -189,6 +189,8 @@ class Rooftop_Api_Authentication_Admin {
         $api_password = md5(uniqid(rand(), true));
 
         $api_user_id = wp_create_user($api_username, $api_password);
+        update_user_meta($api_user_id, 'api_user', array('role' => $role->name));
+
         $api_user = get_userdata($api_user_id);
         $api_user->add_role($role->name);
         add_user_to_blog($blog_id, $api_user_id, $role->name);
@@ -242,7 +244,8 @@ class Rooftop_Api_Authentication_Admin {
                 'edit_others_attachments' => true,
                 'edit_others_pages' => true,
                 'edit_others_posts' => true,
-                'read' => true
+                'read' => true,
+                'upload_files' => false
             ));
 
             add_role("api-read-write", "Read/Write API User", array(
@@ -274,7 +277,7 @@ class Rooftop_Api_Authentication_Admin {
                 'read_private_pages' => true,
                 'read_private_posts' => true,
                 'unfiltered_html' => true,
-                'upload_files' => true
+                'upload_files' => false
             ));
 
             update_option("api_roles_added", true);
