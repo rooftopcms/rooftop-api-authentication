@@ -304,6 +304,26 @@ class Rooftop_Api_Authentication_Admin {
     }
 
     /**
+     * @param $blog_id
+     *
+     * when deleting a blog, we also remove its associated users (and the user accounts themselves
+     * if they're only associated with this specific blog, as is usually the case)
+     *
+     */
+    public function remove_users_from_blog($blog_id) {
+        $blog_users = get_users(array('blog_id' => $blog_id));
+
+        foreach($blog_users as $blog_user) {
+            $blogs = get_blogs_of_user($blog_user->ID);
+            remove_user_from_blog($blog_user->user_id, $blog_id);
+
+            if(count($blogs)==1) {
+                wp_delete_user($blog_user->ID);
+            }
+        }
+    }
+
+    /**
      * @param $user_id
      *
      * When we remove an API key, we also remove the corresponding user account from the site.
@@ -316,7 +336,7 @@ class Rooftop_Api_Authentication_Admin {
         global $wpdb;
 
         $blogs = get_blogs_of_user($user_id);
-        if(count($blogs)==1){
+        if(count($blogs)==1) {
             $table_name = $wpdb->base_prefix."users";
             $wpdb->delete($table_name, array('id' => $user_id));
         }
