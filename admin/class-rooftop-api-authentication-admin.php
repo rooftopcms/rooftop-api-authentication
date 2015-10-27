@@ -106,7 +106,7 @@ class Rooftop_Api_Authentication_Admin {
         $rooftop_api_menu_slug = "rooftop-overview";
 
 
-        add_submenu_page($this->plugin_name."-overview", "API Keys", "API Keys", "manage_options", $rooftop_api_menu_slug, function() {
+        add_submenu_page($rooftop_api_menu_slug, "API Keys", "API Keys", "manage_options", $rooftop_api_menu_slug, function() {
             if($_POST && array_key_exists('method', $_POST)) {
                 $method = strtoupper($_POST['method']);
             }elseif($_POST && array_key_exists('id', $_POST)){
