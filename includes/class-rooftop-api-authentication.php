@@ -165,7 +165,7 @@ class Rooftop_Api_Authentication {
         $this->loader->add_action('wpmu_new_blog', $plugin_admin, 'add_api_key_tables');
 
         $this->loader->add_action('delete_blog', $plugin_admin, 'remove_users_from_blog');
-        $this->loader->add_action('delete_blog', $plugin_admin, 'remove_api_key_tables');
+        $this->loader->add_action('delete_blog', $plugin_admin, 'remove_api_key_tables', 20 );
         $this->loader->add_action('delete_user', $plugin_admin, 'remove_user_from_network');
 
 	}
