@@ -186,8 +186,8 @@ class Rooftop_Api_Authentication_Public {
      *
      * note: this rest_post_query is only called on collection endpoints (get_posts), not single resource (get_post(id))
      */
-    public function adjust_query_for_preview_mode( $query_args ) {
-        if( defined( "ROOFTOP_PREVIEW_MODE" ) && true == ROOFTOP_PREVIEW_MODE ) {
+    public function adjust_query_for_drafts( $query_args ) {
+        if( defined( "ROOFTOP_INCLUDE_DRAFTS" ) && true == ROOFTOP_INCLUDE_DRAFTS ) {
             $query_args['post_status'] = apply_filters( 'rooftop_published_statuses', array() );
         }
 
