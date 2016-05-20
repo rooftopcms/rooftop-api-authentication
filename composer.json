@@ -21,6 +21,6 @@
     "type": "wordpress-muplugin",
     "require": {
         "wpackagist-plugin/posts-to-posts": "1.6.4",
-        "rooftopcms/rooftop-preview-mode": "dev-preview_mode"
+        "rooftopcms/rooftop-preview-mode-admin": "dev-preview_mode"
     }
 }
