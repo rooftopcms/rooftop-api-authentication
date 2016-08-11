@@ -169,8 +169,8 @@ class Rooftop_Api_Authentication_Public {
      * Checks the request for the API key and ensures it's valid for the given endpoint.
      * Called after set_current_user.
      */
-    public function validate_api_key($error){
-        if(!empty($error)){
+    public function validate_api_key( $error ) {
+        if( !empty( $error ) ) {
             return $error;
         }
 
@@ -183,10 +183,12 @@ class Rooftop_Api_Authentication_Public {
      * @return mixed
      *
      * if we're in preview mode, return any post which is visible, or intended to be visible (ie not deleted)
+     *
+     * note: this rest_post_query is only called on collection endpoints (get_posts), not single resource (get_post(id))
      */
-    public function adjust_query_for_preview_mode($query_args){
-        if(defined("ROOFTOP_PREVIEW_MODE") && true == ROOFTOP_PREVIEW_MODE) {
-            $query_args['post_status'] = array('publish', 'draft', 'scheduled', 'pending');
+    public function adjust_query_for_drafts( $query_args ) {
+        if( apply_filters( 'rooftop_include_drafts', false ) ) {
+            $query_args['post_status'] = apply_filters( 'rooftop_published_statuses', array() );
         }
 
         return $query_args;
