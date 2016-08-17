@@ -159,6 +159,7 @@ class Rooftop_Api_Authentication_Public {
         if (is_wp_error($wp_rest_auth_error)) {
             return null;
         }
+
         return $wp_rest_auth_error;
     }
 
@@ -176,6 +177,14 @@ class Rooftop_Api_Authentication_Public {
 
         global $wp_rest_auth_error;
         return $wp_rest_auth_error;
+    }
+
+    public function add_drafts_query_filters( $request ) {
+        $types = get_post_types(array('public' => true));
+
+        foreach($types as $key => $type) {
+            add_action( "rest_{$type}_query", array( $this, 'adjust_query_for_drafts' ), 10, 1 );
+        }
     }
 
     /**
