@@ -33,9 +33,7 @@
                 </th>
                 <td>
                     <input type="checkbox" name="key_read_only" />
-                    <p class="description">
-                        Something about the difference between a read-only key and a regular one
-                    </p>
+                    <span class="hint">Read-only only keys will only be able to GET data from the API</span>
                 </td>
             </tr>
         </table>
