@@ -15,11 +15,11 @@
  * @wordpress-plugin
  * Plugin Name:       Rooftop API Authentication
  * Plugin URI:        https://bitbucket.org/errorstudio/rooftop-api-authentication
- * Description:       This is a short description of what the plugin does. It's displayed in the WordPress admin area.
- * Version:           1.0.0
- * Author:            Error Studio
+ * Description:       rooftop-api-authentication allows users to be authenticated with a custom token, which is randomly generated.
+ * Version:           1.2.1
+ * Author:            RooftopCMS
  * Author URI:        https://www.rooftopcms.com
- * License:           MIT
+ * License:           GPL-3.0+
  * License URI:       http://www.gnu.org/licenses/gpl-3.0.txt
  * Text Domain:       rooftop-api-authentication
  * Domain Path:       /languages

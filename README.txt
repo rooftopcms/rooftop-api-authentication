@@ -1,4 +1,4 @@
-=== Plugin Name ===
+=== Rooftop API Authentication ===
 Contributors: rooftopcms
 Tags: rooftop, api, admin, headless
 Requires at least: 4.3
