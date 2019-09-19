@@ -135,12 +135,12 @@ class Rooftop_Api_Authentication_Public {
 
             // set_current_user should return either a valid user ID, or a WP_Error
             if($result) {
-                $get_request = $_SERVER['REQUEST_METHOD'] == "GET";
+                $read_request = ($_SERVER['REQUEST_METHOD'] == "GET" || $_SERVER['REQUEST_METHOD'] == "OPTIONS");
                 $api_user = get_userdata($result->user_id);
 
                 $api_user_is_read_only = in_array('api-read-only', $api_user->roles);
 
-                if($api_user_is_read_only && !$get_request){
+                if($api_user_is_read_only && !$read_request){
                     $wp_rest_auth_error = new WP_Error('unauthorized', 'Authentication failed', array('status'=>403));
                 }else {
                     $wp_rest_auth_error = $result->user_id;
