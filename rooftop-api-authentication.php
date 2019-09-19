@@ -16,7 +16,7 @@
  * Plugin Name:       Rooftop API Authentication
  * Plugin URI:        https://bitbucket.org/errorstudio/rooftop-api-authentication
  * Description:       rooftop-api-authentication allows users to be authenticated with a custom token, which is randomly generated.
- * Version:           1.2.1
+ * Version:           1.2.2
  * Author:            RooftopCMS
  * Author URI:        https://www.rooftopcms.com
  * License:           GPL-3.0+
