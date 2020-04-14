@@ -18,7 +18,7 @@
 <div class="wrap">
     <h2>
         API Keys
-        <a href="?page=rooftop-overview&new=true" class="page-title-action">Add New</a>
+        <a href="?page=api-keys&new=true" class="page-title-action">Add New</a>
     </h2>
 
     <?php if(count($api_keys)):?>
@@ -36,7 +36,7 @@
                     $r = get_role('api-read-write');
                     $f = 1;
                     ?>
-                    <td><a href="?page=rooftop-overview&id=<?php echo $api_key['id'];?>"><?php echo $api_key['key_name'];?></a></td>
+                    <td><a href="?page=api-keys&id=<?php echo $api_key['id'];?>"><?php echo $api_key['key_name'];?></a></td>
                     <td><?php echo $api_key['api_key'];?></td>
                     <td>
                         <?php
@@ -60,7 +60,7 @@
         </table>
     <?php else: ?>
         <p>
-            You haven't added any API keys yet. <a href="?page=rooftop-overview&new=true">Add a new API Key</a>.
+            You haven't added any API keys yet. <a href="?page=api-keys&new=true">Add a new API Key</a>.
         </p>
     <?php endif;?>
 </div>

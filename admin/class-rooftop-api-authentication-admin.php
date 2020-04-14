@@ -103,10 +103,7 @@ class Rooftop_Api_Authentication_Admin {
 	}
 
     public function api_menu_links() {
-        $rooftop_api_menu_slug = "rooftop-overview";
-
-
-        add_submenu_page($rooftop_api_menu_slug, "API Keys", "API Keys", "manage_options", $rooftop_api_menu_slug, function() {
+        add_menu_page("API Keys", "API Keys", "manage_options", "api-keys", function() {
             if($_POST && array_key_exists('method', $_POST)) {
                 $method = strtoupper($_POST['method']);
             }elseif($_POST && array_key_exists('id', $_POST)){
@@ -142,7 +139,7 @@ class Rooftop_Api_Authentication_Admin {
         $table_name = $wpdb->prefix . "api_keys";
 
         $api_keys = array();
-        $sql = "SELECT id, key_name, domain, api_key, user_id FROM $table_name WHERE domain = '$request_domain';";
+        $sql = "SELECT id, key_name, api_key, user_id FROM $table_name;";
         $results = $wpdb->get_results($sql, OBJECT);
         foreach($results as $result) {
             $key_user = get_userdata($result->user_id);
@@ -161,31 +158,28 @@ class Rooftop_Api_Authentication_Admin {
         global $wpdb;
 
         $table_name = $wpdb->prefix . "api_keys";
-        $blog = get_blog_details(get_current_blog_id());
-        $api_key = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table_name WHERE domain = %s and id = %d", array($blog->domain, $_GET['id'])));
+        $api_key = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table_name WHERE id = %d", array($_GET['id'])));
 
         require_once plugin_dir_path( __FILE__ ) . 'partials/rooftop-api-authentication-admin-api-show.php';
     }
 
     private function api_keys_create() {
         if(!isset($_POST['api-field-token']) || !wp_verify_nonce($_POST['api-field-token'], 'rooftop-api-authentication-api-add-key')) {
-            print '<div class="wrap"><div class="errors"><p>Form token not verified</p></div></div>';
+            $this->renderMessage("Form token not verified", "failure");
             exit;
         }
 
-        $blog = get_blog_details(get_current_blog_id());
         $new_key_name = $_POST['key_name'];
-        if(!$new_key_name || Rooftop_Api_Authentication_Keys::key_name_exists($new_key_name, $blog)){
-            echo '<div class="wrap"><div class="errors"><p>Unique key name required</p></div></div>';
+        if(!$new_key_name || Rooftop_Api_Authentication_Keys::key_name_exists($new_key_name)){
+            $this->renderMessage("Unique key name required", "failure");
             require_once plugin_dir_path( __FILE__ ) . 'partials/rooftop-api-authentication-admin-api-new.php';
             return;
         }
 
-        $role = (isset($_POST['key_read_only']) && $_POST['key_read_only']=="on") ? get_role('api-read-only') : get_role('api-read-write');
+        $role = (isset($_POST['key_full_access']) && $_POST['key_full_access']=="on") ? get_role('api-read-write') : get_role('api-preview');
 
-        $blog_id = get_current_blog_id();
         $api_key_name = $_POST['key_name'];
-        $api_username = "API USER $blog_id $api_key_name";
+        $api_username = "API USER $api_key_name";
         $api_password = md5(uniqid(rand(), true));
 
         $api_user_id = wp_create_user($api_username, $api_password);
@@ -193,10 +187,9 @@ class Rooftop_Api_Authentication_Admin {
 
         $api_user = get_userdata($api_user_id);
         $api_user->add_role($role->name);
-        add_user_to_blog($blog_id, $api_user_id, $role->name);
 
         if($api_user_id && Rooftop_Api_Authentication_Keys::generate_api_key($api_key_name, $api_user_id)) {
-            echo '<div class="wrap"><p>New key added</p></div>';
+            $this->renderMessage("New key added", "success");
             $this->api_keys_index();
             return;
         }else {
@@ -209,11 +202,10 @@ class Rooftop_Api_Authentication_Admin {
         global $wpdb;
 
         $table_name = $wpdb->prefix . "api_keys";
-        $blog = get_blog_details(get_current_blog_id());
-        $api_key = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table_name WHERE domain = %s and id = %d", array($blog->domain, $_GET['id'])));
+        $api_key = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table_name WHERE id = %d", array($_GET['id'])));
 
         if(!isset($_POST['api-field-token']) || !wp_verify_nonce($_POST['api-field-token'], 'rooftop-api-authentication-api-view-key')) {
-            print '<div class="wrap"><div class="errors"><p>Form token not verified</p></div></div>';
+            $this->renderMessage("Form token not verified", "failure");
             exit;
         }
 
@@ -222,9 +214,9 @@ class Rooftop_Api_Authentication_Admin {
             $wpdb->delete($table_name, array('id' => $_GET['id']));
             do_action('delete_user', $api_key->user_id, null);
 
-            print '<div class="wrap"><div class="errors"><p>Key Deleted</p> </div></div>';
+            $this->renderMessage("Key Deleted", "deleted");
         }else {
-            print '<div class="wrap"><div class="errors"><p>Key not found</p></div></div>';
+            $this->renderMessage("Key not found", "failure");
         }
 
         $this->api_keys_index();
@@ -232,18 +224,18 @@ class Rooftop_Api_Authentication_Admin {
 
     /**
      * Add the roles required for a valid 'api user' account - these roles shouldn't be visible in the admin area, and
-     * are removed by a filter ('option_wp_'.get_current_blog_id().'_user_roles')
+     * are removed by a filter 
      *
      * Called via admin_init
      */
-    public function add_api_user_roles($blog_id) {
+    public function add_api_user_roles() {
         $roles_set = get_option("api_roles_added");
 
         if(!$roles_set){
-            add_role("api-read-only", "Read Only API User", array(
-                'edit_others_attachments' => true,
-                'edit_others_pages' => true,
-                'edit_others_posts' => true,
+            add_role("api-preview", "Content Preview User", array(
+                'edit_others_attachments' => false,
+                'edit_others_pages' => false,
+                'edit_others_posts' => false,
                 'read' => true,
                 'upload_files' => false
             ));
@@ -284,88 +276,46 @@ class Rooftop_Api_Authentication_Admin {
         }
     }
 
+    public function remove_api_user_roles() {
+        update_option("api_roles_added", false);
+    }
+
     /**
-     * @param $blog_id
      * @return mixed
      *
      * Add the blog specific api_keys tables
      */
-    public function add_api_key_tables($blog_id){
-        self::create_database_tables($blog_id);
-        return $blog_id;
+    public function add_api_key_tables(){
+        return self::create_database_tables();
     }
 
     /**
-     * @param $blog_id
      * @return mixed
      *
      * remove the blog specific api_keys tables
      */
-    public function remove_api_key_tables($blog_id){
-        self::drop_database_tables($blog_id);
-        return $blog_id;
-    }
-
-    /**
-     * @param $blog_id
-     *
-     * when deleting a blog, we also remove its associated users (and the user accounts themselves
-     * if they're only associated with this specific blog, as is usually the case)
-     *
-     */
-    public function remove_users_from_blog($blog_id) {
-        $blog_users = get_users(array('blog_id' => $blog_id));
-
-        foreach($blog_users as $blog_user) {
-            $blogs = get_blogs_of_user($blog_user->ID);
-            remove_user_from_blog($blog_user->user_id, $blog_id);
-
-            if(count($blogs)==1) {
-                wp_delete_user($blog_user->ID);
-            }
-        }
-    }
-
-    /**
-     * @param $user_id
-     *
-     * When we remove an API key, we also remove the corresponding user account from the site.
-     * However, the user isn't also deleted from the parent network (only its association to the sub-site)
-     *
-     * The delete_user hook calls this, with the $user_id and we remove the user manually (but only if it
-     * only belongs to 1 blog)
-     */
-    public function remove_user_from_network($user_id){
-        global $wpdb;
-
-        $blogs = get_blogs_of_user($user_id);
-        if(count($blogs)==1) {
-            $table_name = $wpdb->base_prefix."users";
-            $wpdb->delete($table_name, array('id' => $user_id));
-        }
+    public function remove_api_key_tables(){
+        return self::drop_database_tables();
     }
 
     /**
      * Create the API Keys table
      *
-     * domain - the client site domain name
      * api_key - the api key to authenticate the client request
      */
-    public static function create_database_tables($blog_id) {
+    public static function create_database_tables() {
         global $wpdb;
 
-        $table_name = $wpdb->prefix . "${blog_id}_api_keys";
+        $table_name = $wpdb->prefix . "api_keys";
 
         if($wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name) {
             $sql = <<<EOSQL
 CREATE TABLE $table_name (
     id MEDIUMINT NOT NULL AUTO_INCREMENT,
     key_name VARCHAR(256) NOT NULL,
-    domain VARCHAR(256) NOT NULL,
     api_key VARCHAR(256) NOT NULL,
     user_id INTEGER NOT NULL,
 PRIMARY KEY(id),
-INDEX(domain),
 INDEX(api_key))
 EOSQL;
 
@@ -373,7 +323,7 @@ EOSQL;
         }
 
     }
-    public static function drop_database_tables($blog_id) {
+    public static function drop_database_tables() {
         global $wpdb;
 
         $table_name = $wpdb->prefix . "api_keys";
@@ -382,5 +332,11 @@ DROP TABLE $table_name;
 EOSQL;
 
         $wpdb->query($sql);
+    }
+
+    private function renderMessage($message, $messageType) {
+        echo "<div id='message' class='${messageType} notice is-dismissible'>";
+        echo "    <p><strong>${message}</strong></p>";
+        echo "<button type='button' class='notice-dismiss'><span class='screen-reader-text'>Dismiss this notice.</span></button></div>";
     }
 }

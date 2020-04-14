@@ -15,25 +15,25 @@
 
 
 <div class="wrap">
-    <h1>Add new API key</h1>
+    <h1>Preview API key</h1>
 
-    <form action="?page=rooftop-overview" method="post">
+    <form action="?page=api-keys" method="post">
         <table class="form-table">
             <tr>
                 <th scope="row">
                     API Key name
                 </th>
                 <td>
-                    <input type="text" name="key_name" placeholder="iOS API Key" value="<?php defined('$new_key_name') ? $new_key_name : '' ?>"/>
+                    <input type="text" name="key_name" placeholder="Content Preview API Key" value="<?php defined('$new_key_name') ? $new_key_name : '' ?>"/>
                 </td>
             </tr>
             <tr>
                 <th scope="row">
-                    Read-only
+                    Full API Access
                 </th>
                 <td>
-                    <input type="checkbox" name="key_read_only" />
-                    <span class="hint">Read-only only keys will only be able to GET data from the API</span>
+                    <input type="checkbox" name="key_full_access" />
+                    <span class="hint">This will create a key for a user that will have read/write access via the API</span>
                 </td>
             </tr>
         </table>
