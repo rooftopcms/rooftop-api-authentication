@@ -160,6 +160,19 @@ class Rooftop_Api_Authentication_Admin {
         $table_name = $wpdb->prefix . "api_keys";
         $api_key = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table_name WHERE id = %d", array($_GET['id'])));
 
+        if( !$api_key ) {
+            $this->renderMessage("Key not found", "failure");
+
+            $err = <<<EOL
+                <div>
+                    <br/><br/><br/>
+                    <a href="?page=api-keys" class="page-title-action">List</a> API Keys or <a href="?page=api-keys&new=true" class="page-title-action">add a new one</a>.
+                </div>
+EOL;
+            echo $err;
+            exit;
+        }
+
         require_once plugin_dir_path( __FILE__ ) . 'partials/rooftop-api-authentication-admin-api-show.php';
     }
 
