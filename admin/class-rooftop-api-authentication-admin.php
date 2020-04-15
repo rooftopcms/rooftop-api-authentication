@@ -245,12 +245,22 @@ EOL;
         $roles_set = get_option("api_roles_added");
 
         if(!$roles_set){
-            add_role("api-preview", "Content Preview User", array(
-                'edit_others_attachments' => false,
-                'edit_others_pages' => false,
-                'edit_others_posts' => false,
-                'read' => true,
-                'upload_files' => false
+            remove_role( 'api-preview' );
+            remove_role( 'api-read-write' );
+            
+            add_role("api-preview", "Preview API User", array(
+                'delete_attachments' => true,
+                'delete_others_attachments' => true,
+                'delete_others_pages' => true,
+                'delete_others_posts' => true,
+                'delete_pages' => true,
+                'delete_posts' => true,
+                'edit_others_pages' => true,
+                'edit_others_posts' => true,
+                'edit_pages' => true,
+                'edit_posts' => true,
+                'edit_published_pages' => true,
+                'edit_published_posts' => true,
             ));
 
             add_role("api-read-write", "Read/Write API User", array(

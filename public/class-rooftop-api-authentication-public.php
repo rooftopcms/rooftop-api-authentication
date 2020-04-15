@@ -116,13 +116,12 @@ class Rooftop_Api_Authentication_Public {
          * whether we're hitting a rest enpoint or a regular WP-Admin page
          */
         if (!empty($user)) {
-            return $user;
+	        return $user;
         }
 
         remove_filter( 'determine_current_user', 'json_basic_auth_handler', 20 );
 
         // check that we've been given an api key header
-        $request_domain = $_SERVER['HTTP_HOST'];
         $api_key = array_key_exists('HTTP_API_TOKEN', $_SERVER) ? $_SERVER['HTTP_API_TOKEN'] : null;
 
         if($api_key) {
@@ -130,7 +129,7 @@ class Rooftop_Api_Authentication_Public {
             global $wpdb;
 
             $table_name = $wpdb->prefix . "api_keys";
-            $sql = "SELECT id, key_name, domain, api_key, user_id FROM $table_name WHERE domain = '$request_domain' AND api_key = '$api_key'";
+            $sql = "SELECT id, key_name, domain, api_key, user_id FROM $table_name WHERE api_key = '$api_key'";
             $result = $wpdb->get_row($sql, OBJECT);
 
             // set_current_user should return either a valid user ID, or a WP_Error
@@ -162,6 +161,48 @@ class Rooftop_Api_Authentication_Public {
 
         return $wp_rest_auth_error;
     }
+
+	public function set_preview_user( $user ) {
+		// check that we've been given a valid preview key
+		$bearer = array_key_exists('HTTP_AUTHORIZATION', $_SERVER) ? $_SERVER['HTTP_AUTHORIZATION'] : null;
+
+		$matches = null;
+		preg_match('/Bearer ([^$]+)/', $bearer, $matches);
+
+		// only authorise these tokens when querying the graph...
+		if( !preg_match('/^\/graphql/', $_SERVER['REQUEST_URI']) ) {
+			return $user;
+		}
+
+		// no bearer token given
+		if( !count($matches)>1 ) {
+			return $user;
+		}
+
+		$previewToken = $matches[1];
+
+		$wp_auth_response = new WP_Error('forbidden', 'Authentication failed', array('status'=>401));
+
+		if($previewToken) {
+			global $wpdb;
+
+			$table_name = $wpdb->prefix . "api_keys";
+			$sql = "SELECT id, key_name, api_key, user_id FROM $table_name WHERE api_key = '$previewToken'";
+			$result = $wpdb->get_row($sql, OBJECT);
+
+			// if we have a matching user, we can check they have the api-preview role and return their id
+			if($result) {
+				$api_user        = get_userdata( $result->user_id );
+				$is_preview_user = in_array( 'api-preview', $api_user->roles );
+
+				if ( $is_preview_user ) {
+					return $result->user_id;
+				}
+			}
+		}
+
+		return $wp_auth_response;
+	}
 
     /**
      * @param $error
