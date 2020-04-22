@@ -135,7 +135,6 @@ class Rooftop_Api_Authentication_Admin {
     private function api_keys_index() {
         global $wpdb;
 
-        $request_domain = $_SERVER['HTTP_HOST'];
         $table_name = $wpdb->prefix . "api_keys";
 
         $api_keys = array();
@@ -148,6 +147,40 @@ class Rooftop_Api_Authentication_Admin {
 
         $api_keys = array_reverse($api_keys);
         require_once plugin_dir_path( __FILE__ ) . 'partials/rooftop-api-authentication-admin-api-index.php';
+    }
+
+    function get_preview_api_key( $revision_id ) {
+	    global $wpdb;
+
+	    $table_name = $wpdb->prefix . "api_keys";
+	    $sql = "SELECT api_key FROM $table_name WHERE preview_key = true LIMIT 1;";
+
+	    $result = $wpdb->get_row($sql, OBJECT);
+	    $salt = $result->api_key;
+
+	    return hash_hmac('sha256', "$revision_id:$salt", NONCE_SALT);
+    }
+
+    function get_preview_api_user_id( $data, $token ) {
+	    global $wpdb;
+
+	    $table_name = $wpdb->prefix . "api_keys";
+	    $sql = "SELECT * FROM $table_name;";
+
+	    $rows = $wpdb->get_results($sql, OBJECT);
+	    $result = false;
+
+	    foreach ($rows as $row) {
+		    $salt = $row->api_key;
+		    $_token = hash_hmac('sha256', "$data:$salt", NONCE_SALT);
+
+		    if( $_token === $token ) {
+		    	$result = $row->user_id;
+		    	break;
+		    }
+	    }
+
+	    return $result;
     }
 
     private function api_keys_edit() {
@@ -183,13 +216,14 @@ EOL;
         }
 
         $new_key_name = $_POST['key_name'];
-        if(!$new_key_name || Rooftop_Api_Authentication_Keys::key_name_exists($new_key_name)){
+        if(!$new_key_name || Rooftop_Api_Authentication_Keys::key_name_exists($new_key_name)) {
             $this->renderMessage("Unique key name required", "failure");
             require_once plugin_dir_path( __FILE__ ) . 'partials/rooftop-api-authentication-admin-api-new.php';
             return;
         }
 
         $role = (isset($_POST['key_full_access']) && $_POST['key_full_access']=="on") ? get_role('api-read-write') : get_role('api-preview');
+        $preview_key = $_POST['key_full_access']!="on";
 
         $api_key_name = $_POST['key_name'];
         $api_username = "API USER $api_key_name";
@@ -201,12 +235,13 @@ EOL;
         $api_user = get_userdata($api_user_id);
         $api_user->add_role($role->name);
 
-        if($api_user_id && Rooftop_Api_Authentication_Keys::generate_api_key($api_key_name, $api_user_id)) {
+        $key_created = Rooftop_Api_Authentication_Keys::generate_api_key($api_key_name, $api_user_id, $preview_key);
+        if($api_user_id && $key_created === true) {
             $this->renderMessage("New key added", "success");
             $this->api_keys_index();
             return;
         }else {
-            echo "Couldn't generate API key - please contact support";
+	        $this->renderMessage($key_created, "error");
             return;
         }
     }
@@ -330,6 +365,7 @@ EOL;
         global $wpdb;
 
         $table_name = $wpdb->prefix . "api_keys";
+        echo $wpdb->get_var("SHOW TABLES LIKE '$table_name'");
 
         if($wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name) {
             $sql = <<<EOSQL
@@ -338,6 +374,7 @@ CREATE TABLE $table_name (
     key_name VARCHAR(256) NOT NULL,
     api_key VARCHAR(256) NOT NULL,
     user_id INTEGER NOT NULL,
+    preview_key BOOLEAN NOT NULL DEFAULT false, 
 PRIMARY KEY(id),
 INDEX(api_key))
 EOSQL;

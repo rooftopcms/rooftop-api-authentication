@@ -28,24 +28,29 @@
  * @author     Error Studio <info@errorstudio.co.uk>
  */
 class Rooftop_Api_Authentication_Keys {
-    public static function generate_api_key($key_name, $user_id){
+    public static function generate_api_key($key_name, $user_id, $preview_key){
         global $wpdb;
 
         update_user_option($user_id, "has_api_key", true);
         
-        $current_key_count_sql = "SELECT COUNT(*) FROM wp_2_api_keys WHERE user_id = $user_id AND key_name = '$key_name';";
+        $current_key_count_sql = "SELECT COUNT(*) FROM wp_api_keys WHERE user_id = $user_id AND key_name = '$key_name';";
+        $preview_key_count = (int)$wpdb->get_var("SELECT COUNT(*) FROM wp_api_keys WHERE preview_key = true");
         $current_key_count = (int)$wpdb->get_var($current_key_count_sql);
 
         if($current_key_count != 0){
-            wp_die(__("API key not generated - this user already has an API key"));
+            return "This user already has an API key";
+        }
+
+        if($preview_key && $preview_key_count != 0) {
+        	return "A preview key already exists.";
         }
 
         $key = self::api_key();
         $table_name = $wpdb->prefix . "api_keys";
-        $new_key = array('key_name' => $key_name, 'api_key'=>$key, 'user_id'=>$user_id);
-        $inserted = $wpdb->insert($table_name, $new_key, array('%s', '%s', '%s', '%d'));
+        $new_key = array('key_name' => $key_name, 'api_key'=>$key, 'user_id'=>$user_id, 'preview_key' => $preview_key);
+        $inserted = $wpdb->insert($table_name, $new_key, array('%s', '%s', '%s', '%d', '%d'));
 
-        return $inserted;
+        return $inserted == 1;
     }
     public static function delete_api_keys($user_id){
         global $wpdb;

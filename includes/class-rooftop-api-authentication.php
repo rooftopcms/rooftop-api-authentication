@@ -162,6 +162,9 @@ class Rooftop_Api_Authentication {
 
         $this->loader->add_action('admin_menu', $plugin_admin, 'api_menu_links');
 		$this->loader->add_filter('admin_init', $plugin_admin, 'add_api_user_roles');
+
+		$this->loader->add_filter( 'rooftop/preview_api_key', $plugin_admin, 'get_preview_api_key', 1 );
+		$this->loader->add_filter( 'rooftop/preview_api_user_id', $plugin_admin, 'get_preview_api_user_id', 1, 2 );
 		
 		register_activation_hook( plugin_dir_path( dirname(__FILE__) ) . 'rooftop-api-authentication.php' , array($plugin_admin, 'add_api_key_tables') );
 		register_deactivation_hook( plugin_dir_path( dirname(__FILE__) ) . 'rooftop-api-authentication.php' , array($plugin_admin, 'remove_api_user_roles') );

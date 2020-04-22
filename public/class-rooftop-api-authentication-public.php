@@ -163,11 +163,12 @@ class Rooftop_Api_Authentication_Public {
     }
 
 	public function set_preview_user( $user ) {
-		// check that we've been given a valid preview key
-		$bearer = array_key_exists('HTTP_AUTHORIZATION', $_SERVER) ? $_SERVER['HTTP_AUTHORIZATION'] : null;
+		global $wpdb;
 
-		$matches = null;
-		preg_match('/Bearer ([^$]+)/', $bearer, $matches);
+		// check that we've been given a valid preview key
+		$bearer_header = array_key_exists('HTTP_AUTHORIZATION', $_SERVER) ? $_SERVER['HTTP_AUTHORIZATION'] : null;
+		preg_match('/Bearer ([^:]+):([^$]+)/', $bearer_header, $matches);
+		list($subject, $revision_id, $preview_token) = $matches;
 
 		// only authorise these tokens when querying the graph...
 		if( !preg_match('/^\/graphql/', $_SERVER['REQUEST_URI']) ) {
@@ -179,25 +180,30 @@ class Rooftop_Api_Authentication_Public {
 			return $user;
 		}
 
-		$previewToken = $matches[1];
+		$wp_auth_response = null;
 
-		$wp_auth_response = new WP_Error('forbidden', 'Authentication failed', array('status'=>401));
+		if( $preview_token && $revision_id ) {
+			$token = apply_filters( 'rooftop/preview_api_key', $revision_id );
 
-		if($previewToken) {
-			global $wpdb;
+			// if we have a token, we can fetch the user and check they have the api-preview role and return their id
+			if($token === $preview_token) {
+				$api_user_id = apply_filters( 'rooftop/preview_api_user_id', $revision_id, $preview_token );
+				$api_user    = get_userdata( $api_user_id );
 
-			$table_name = $wpdb->prefix . "api_keys";
-			$sql = "SELECT id, key_name, api_key, user_id FROM $table_name WHERE api_key = '$previewToken'";
-			$result = $wpdb->get_row($sql, OBJECT);
-
-			// if we have a matching user, we can check they have the api-preview role and return their id
-			if($result) {
-				$api_user        = get_userdata( $result->user_id );
 				$is_preview_user = in_array( 'api-preview', $api_user->roles );
+				$revision        = null;
 
-				if ( $is_preview_user ) {
-					return $result->user_id;
+				try {
+					// fixme why wont wp_get_post_revisions work here?
+					$revision = $wpdb->get_row("SELECT id FROM wp_posts WHERE post_type = 'revision' AND id = $revision_id");
+				}catch(Exception $e) {
 				}
+
+				if ( $is_preview_user && $revision ) {
+					return $api_user_id;
+				}
+			}else {
+				status_header(403);
 			}
 		}
 
